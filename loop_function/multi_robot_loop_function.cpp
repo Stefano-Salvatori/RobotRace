@@ -9,7 +9,7 @@ MultiRobotLoopFunction::MultiRobotLoopFunction() : stepCount(0),
                                                    totalStepProximity(0),
                                                    totalStepRightWheelSpeed(0),
                                                    totalStepLeftWheelSpeed(0),
-                                                   stepByStepPerformance(0),
+                                                   totalOnSegmentPerformance(0),
                                                    mainFootbot(NULL),
                                                    mainController(NULL),
                                                    opponentFootbot(NULL),
@@ -50,7 +50,6 @@ void MultiRobotLoopFunction::Init(TConfigurationNode &t_node)
     );
     AddEntity(*opponentFootbot);
     opponentController = &dynamic_cast<AdvancedController &>(opponentFootbot->GetControllableEntity().GetController());
-
 
     /*
     * Process trial information, if any
@@ -100,7 +99,7 @@ void MultiRobotLoopFunction::PostStep()
         const Real avgLeftSpeed = this->totalStepLeftWheelSpeed / (SAMPLE_STEP_VALUE * AdvancedController::MAX_VELOCITY);
         const Real goFast = (abs(avgRightSpeed) + abs(avgLeftSpeed)) / 2;
         const Real goStraight = 1 - sqrt(abs(avgRightSpeed - avgLeftSpeed) / 2);
-        stepByStepPerformance += avoidCollisions * goFast;
+        totalOnSegmentPerformance += avoidCollisions * goFast;
 
         this->totalStepProximity = 0;
         this->totalStepRightWheelSpeed = 0;
@@ -122,6 +121,7 @@ void MultiRobotLoopFunction::Reset()
     this->totalStepProximity = 0;
     this->totalStepRightWheelSpeed = 0;
     this->totalStepLeftWheelSpeed = 0;
+    this->totalOnSegmentPerformance = 0;
 
     // Move robot to the initial position
     const CVector2 mainFootbotPos = SubdivideSegment(startingSegmentV1, startingSegmentV2, 1.0 / 4);
@@ -172,7 +172,7 @@ Real MultiRobotLoopFunction::Performance()
 {
     size_t summedValuesCount = this->stepCount / SAMPLE_STEP_VALUE;
     const Real distanceFromFinish = DistanceFromSegment(GetFootbotPosition(mainFootbot), this->finishSegmentV1, this->finishSegmentV2);
-    return stepByStepPerformance / (summedValuesCount * distanceFromFinish * this->stepCount);
+    return totalOnSegmentPerformance / (summedValuesCount * distanceFromFinish * this->stepCount);
 }
 
 /****************************************/

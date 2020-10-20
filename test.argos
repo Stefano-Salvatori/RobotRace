@@ -22,7 +22,7 @@
         <footbot_proximity implementation="default" show_rays="true" />
       </sensors>
 
-      <params num_inputs="24" num_outputs="2" parameter_file="best_single/best_37.dat" />
+      <params num_inputs="24" num_outputs="2" parameter_file="best_single/best_150.dat" />
     </simple_controller>
 
   </controllers>
@@ -31,8 +31,8 @@
   <!-- ****************** -->
   <!-- * Loop functions * -->
   <!-- ****************** -->
-  <loop_functions library="build/loop_function/libsingle_robot_loop_function.so" label="single_robot_loop_function" finishSegmentV1="0,-8" finishSegmentV2="2,-8" 
-    startingSegmentV1="-3,7.5" startingSegmentV2="-3,6.5"/>
+  <!--<loop_functions library="build/loop_function/libsingle_robot_loop_function.so" label="single_robot_loop_function" finishSegmentV1="0,-7.5" finishSegmentV2="2,-7.5" 
+    startingSegmentV1="-3,7.5" startingSegmentV2="-3,6.5" debug="true"/>-->
 
   <!-- *********************** -->
   <!-- * Arena configuration * -->
@@ -85,15 +85,15 @@
     </box>
 
     <box id="obstacle_1" size="0.2,0.2,0.2" movable="false">
-      <body position="0,7,0" orientation="-90,0,0" />
+      <body position="0,7.1,0" orientation="-90,0,0" />
     </box>
 
-    <box id="obstacle_2" size="0.2,0.2,0.2" movable="false">
-      <body position="1,5.5,0" orientation="-90,0,0" />
+    <box id="obstacle_2" size="0.7,0.2,0.2" movable="false">
+      <body position="1,5.5,0" orientation="45,0,0" />
     </box>
 
-    <box id="obstacle_3" size="0.2,0.2,0.2" movable="false">
-      <body position="3,3.5,0" orientation="-90,0,0" />
+    <box id="obstacle_3" size="0.8,0.2,0.2" movable="false">
+      <body position="3,3.5,0" orientation="0,0,0" />
     </box>
 
     <box id="obstacle_4" size="0.2,0.2,0.2" movable="false">
@@ -102,10 +102,10 @@
 
 
     <!-- Place a foot-bot and bind it to the controller -->
-    <!--<foot-bot id="fb_0">
+    <foot-bot id="fb_0">
       <body position="-3, 7.7, 0" orientation="0,0,0" />
-      <controller config="genetic_nn_2"/>
-    </foot-bot>-->
+      <controller config="genetic_nn"/>
+    </foot-bot>
 
   </arena>
 

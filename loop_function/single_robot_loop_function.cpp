@@ -5,6 +5,8 @@
 // The experiment finishes when the robot is less then MIN_DISTANCE_FROM_FINISH distant from the finish line
 #define MIN_DISTANCE_FROM_FINISH 0.01
 
+bool DEBUG = false;
+
 SingleRobotLoopFunction::SingleRobotLoopFunction() : stepCount(0),
                                                      totalStepProximity(0),
                                                      totalStepRightWheelSpeed(0),
@@ -50,6 +52,8 @@ void SingleRobotLoopFunction::Init(TConfigurationNode &t_node)
     */
    try
    {
+      GetNodeAttributeOrDefault(t_node, "debug", DEBUG, false);
+
       // Get finish line from configuration file
       GetNodeAttributeOrDefault(t_node, "finishSegmentV1", this->finishSegmentV1, CVector2(0, 0));
       GetNodeAttributeOrDefault(t_node, "finishSegmentV2", this->finishSegmentV2, CVector2(0, 0));
@@ -88,13 +92,32 @@ void SingleRobotLoopFunction::PostStep()
       const Real avoidCollisions = 1 - this->totalStepProximity / SEGMENT_LENGTH;
       const Real avgRightSpeed = this->totalStepRightWheelSpeed / SEGMENT_LENGTH;
       const Real avgLeftSpeed = this->totalStepLeftWheelSpeed / SEGMENT_LENGTH;
-      const Real goFast = (abs(avgRightSpeed) + abs(avgLeftSpeed)) / 2;
-      const Real goStraight = 1 - sqrt(abs(avgRightSpeed - avgLeftSpeed) / 2);
-      totalOnSegmentPerformance += avoidCollisions * (goFast / SimpleController::MAX_VELOCITY);
+
+      //velocity scaled to 0 - 1
+      const Real goFast = abs((avgRightSpeed + avgLeftSpeed) / (2 * SimpleController::MAX_VELOCITY));
+      // const Real goStraight = 1 - sqrt(abs(avgRightSpeed - avgLeftSpeed) / 2);
+
+      totalOnSegmentPerformance += avoidCollisions * goFast;
 
       this->totalStepProximity = 0;
       this->totalStepRightWheelSpeed = 0;
       this->totalStepLeftWheelSpeed = 0;
+
+      if (DEBUG)
+      {
+         size_t segmentsAnalyzed = this->stepCount / SEGMENT_LENGTH;
+
+         LOG << this->stepCount << std::endl;
+
+         const Real dist = DistanceFromSegment(GetFootBotPosition(), this->finishSegmentV1, this->finishSegmentV2);
+         const Real reachFinishLine = 1 / (1 + dist);
+
+         LOG << "dist: " << reachFinishLine << std::endl;
+
+         LOG << "Avg segment performance after " << segmentsAnalyzed << "segments: "
+             << totalOnSegmentPerformance / segmentsAnalyzed
+             << std::endl;
+      }
    }
 }
 
@@ -112,6 +135,7 @@ void SingleRobotLoopFunction::Reset()
    this->totalStepProximity = 0;
    this->totalStepRightWheelSpeed = 0;
    this->totalStepLeftWheelSpeed = 0;
+   this->totalOnSegmentPerformance = 0;
 
    const CVector3 startingPosition = GetRandomStartingPosition();
    /*
@@ -148,9 +172,9 @@ Real SingleRobotLoopFunction::Performance()
 {
    size_t segmentsAnalyzed = this->stepCount / SEGMENT_LENGTH;
    const Real avgOnSegmentPerformance = totalOnSegmentPerformance / segmentsAnalyzed;
-   const Real distanceFromFinishLine = DistanceFromSegment(GetFootBotPosition(), this->finishSegmentV1, this->finishSegmentV2);
-
-   return avgOnSegmentPerformance / (distanceFromFinishLine * this->stepCount);
+   const Real dist = DistanceFromSegment(GetFootBotPosition(), this->finishSegmentV1, this->finishSegmentV2);
+   const Real reachFinishLine = 1 / (1 + dist);
+   return avgOnSegmentPerformance * reachFinishLine / this->stepCount;
 }
 
 /****************************************/

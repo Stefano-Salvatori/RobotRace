@@ -44,6 +44,7 @@ float LaunchARGoS(GAGenome &c_genome)
         cSimulator.Execute();
         /* Update performance */
         worstPerformance = Min(worstPerformance, cLoopFunctions.Performance());
+        
     }
     /* Return the result of the evaluation */
     return worstPerformance;
@@ -90,11 +91,11 @@ int main(int argc, char **argv)
     GASimpleGA cGA(cGenome);
 
     cGA.maximize();         // the objective function must be maximized
-    cGA.populationSize(40); // population size for each generation
-    cGA.nGenerations(200);  // number of generations
+    cGA.populationSize(30); // population size for each generation
+    cGA.nGenerations(150);  // number of generations
     cGA.pMutation(0.15f);   // prob of gene mutation
     cGA.crossover(GARealTwoPointCrossover);
-    cGA.pCrossover(0.15f);              // prob of gene crossover
+    cGA.pCrossover(0.25f);              // prob of gene crossover
     cGA.scoreFilename("evolution.dat"); // filename for the result log
     cGA.flushFrequency(1);              // log the results every generation
 
@@ -129,7 +130,7 @@ int main(int argc, char **argv)
 
             /* Flush best individual */
             argos::LOG << "   Flushing best individual: "
-                       << dynamic_cast<const GARealGenome &>(cGA.statistics().bestIndividual()).score()
+                       << cGA.statistics().bestIndividual().score()
                        << "...";
             if (FlushBest(dynamic_cast<const GARealGenome &>(cGA.statistics().bestIndividual()), cGA.generation()) == 0)
             {
