@@ -1,0 +1,135 @@
+<?xml version="1.0" ?>
+<argos-configuration>
+
+  <!-- ************************* -->
+  <!-- * General configuration * -->
+  <!-- ************************* -->
+  <framework>
+    <system threads="0" />
+    <experiment length="200" ticks_per_second="10" random_seed="124" />
+  </framework>
+
+  <!-- *************** -->
+  <!-- * Controllers * -->
+  <!-- *************** -->
+  <controllers>
+    <simple_controller id="genetic_nn" library="build/controllers/libsimple_controller.so">
+      <actuators>
+        <differential_steering implementation="default" />
+        <leds implementation="default" medium="leds" />
+      </actuators>
+      <sensors>
+        <footbot_proximity implementation="default" show_rays="true" />
+      </sensors>
+
+      <params num_inputs="24" num_outputs="2" />
+    </simple_controller>
+
+  </controllers>
+
+
+  <!-- ****************** -->
+  <!-- * Loop functions * -->
+  <!-- ****************** -->
+  <loop_functions library="build/loop_function/libsingle_robot_loop_function.so" label="single_robot_loop_function" finishSegmentV1="0,-8" finishSegmentV2="2,-8" 
+    startingSegmentV1="-3,7.5" startingSegmentV2="-3,6.5"/>
+  <!-- *********************** -->
+  <!-- * Arena configuration * -->
+  <!-- *********************** -->
+  <arena size="8, 16, 1" center="0,0,0.5">
+
+    <!-- Place four boxes in a square to delimit the arena -->
+    <box id="wall_north" size="8,0.1,0.5" movable="false">
+      <body position="0,8,0" orientation="0,0,0" />
+    </box>
+    <box id="wall_south" size="8,0.1,0.5" movable="false">
+      <body position="0,-8,0" orientation="0,0,0" />
+    </box>
+    <box id="wall_east" size="0.1,16,0.5" movable="false">
+      <body position="4,0,0" orientation="0,0,0" />
+    </box>
+    <box id="wall_west" size="0.1,16,0.5" movable="false">
+      <body position="-4,0,0" orientation="0,0,0" />
+    </box>
+
+    <box id="left_wall" size="4,0.1,0.5" movable="false">
+      <body position="-2,6,0" orientation="0,0,0" />
+    </box>
+    <box id="right_wall" size="4,0.1,0.5" movable="false">
+      <body position="-2,8,0" orientation="0,0,0" />
+    </box>
+    <box id="left_wall_2" size="5.65,0.1,0.5" movable="false">
+      <body position="2,6,0" orientation="-45,0,0" />
+    </box>
+    <box id="right_wall_2" size="2.82,0.1,0.5" movable="false">
+      <body position="1,5,0" orientation="-45,0,0" />
+    </box>
+    <box id="left_wall_3" size="4,0.1,0.5" movable="false">
+      <body position="4,2,0" orientation="-90,0,0" />
+    </box>
+    <box id="right_wall_3" size="4,0.1,0.5" movable="false">
+      <body position="2,2,0" orientation="-90,0,0" />
+    </box>
+    <box id="left_wall_4" size="5.65,0.1,0.5" movable="false">
+      <body position="2,-2,0" orientation="45,0,0" />
+    </box>
+    <box id="right_wall_4" size="5.65,0.1,0.5" movable="false">
+      <body position="0,-2,0" orientation="45,0,0" />
+    </box>
+
+    <box id="left_wall_5" size="4,0.1,0.5" movable="false">
+      <body position="1,-6,0" orientation="-60,0,0" />
+    </box>
+    <box id="right_wall_5" size="4,0.1,0.5" movable="false">
+      <body position="-1,-6,0" orientation="-60,0,0" />
+    </box>
+    
+    <box id="obstacle_1" size="0.2,0.2,0.2" movable="false">
+      <body position="0,7,0" orientation="-90,0,0" />
+    </box>
+
+    <box id="obstacle_2" size="0.2,0.2,0.2" movable="false">
+      <body position="1,5.5,0" orientation="-90,0,0" />
+    </box>
+
+    <box id="obstacle_3" size="0.2,0.2,0.2" movable="false">
+      <body position="3,3.5,0" orientation="-90,0,0" />
+    </box>
+
+    <box id="obstacle_4" size="0.2,0.2,0.2" movable="false">
+      <body position="1,-2,0" orientation="-90,0,0" />
+    </box>
+
+
+    <!-- Place a foot-bot in the origin and bind it to the controller -->
+    <!--<foot-bot id="fb_0">
+      <body position="0, 0, 0" orientation="0,0,0" />
+      <controller config="genetic_nn"/>
+    </foot-bot>-->
+
+  </arena>
+
+  <media>
+    <led id="leds" />
+  </media>
+
+  <physics_engines>
+    <dynamics2d id="dyn2d" />
+  </physics_engines>
+  <media />
+
+  <!--
+  <visualization>
+    <qt-opengl>
+      <camera>
+        <placement idx="0" position="2,2,2" look_at="1,1,1" />
+        <placement idx="1" position="0,0,10" look_at="0,0,0" />
+        <placement idx="2" position="3,3,4" look_at="1,6,0" />
+        <placement idx="3" position="2,3,2" look_at="0,1,0" />
+      </camera>
+    </qt-opengl>
+
+  </visualization>-->
+  <visualization />
+
+</argos-configuration>
