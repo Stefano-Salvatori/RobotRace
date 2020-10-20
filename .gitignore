@@ -1,3 +1,8 @@
+build/*
+best/*
+.vscode/*
+*.dat
+
 # Prerequisites
 *.d
 
