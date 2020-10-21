@@ -1,4 +1,4 @@
-<?xml version="1.0" ?>
+<?xml version="1.0"?>
 <argos-configuration>
 
   <!-- ************************* -->
@@ -31,8 +31,10 @@
   <!-- ****************** -->
   <!-- * Loop functions * -->
   <!-- ****************** -->
-  <!--<loop_functions library="build/loop_function/libsingle_robot_loop_function.so" label="single_robot_loop_function" finishSegmentV1="0,-7.5" finishSegmentV2="2,-7.5" 
-    startingSegmentV1="-3,7.5" startingSegmentV2="-3,6.5" debug="true"/>-->
+  <loop_functions library="build/loop_function/libsingle_robot_loop_function.so"
+    label="single_robot_loop_function"
+    finishSegmentV1="0,-7.5" finishSegmentV2="2,-7.5"
+    startingSegmentV1="-3,7.5" startingSegmentV2="-3,6.5" debug="true" />
 
   <!-- *********************** -->
   <!-- * Arena configuration * -->
@@ -100,12 +102,20 @@
       <body position="1,-2,0" orientation="-90,0,0" />
     </box>
 
+    <box id="obstacle_5" size="1,0.2,0.2" movable="false">
+      <body position="2.5,0,0" orientation="0,0,0" />
+    </box>
+
+    <box id="obstacle_6" size="1,0.2,0.2" movable="false">
+      <body position="-1.5,-4,0" orientation="0,0,0" />
+    </box>
+
 
     <!-- Place a foot-bot and bind it to the controller -->
-    <foot-bot id="fb_0">
+    <!--<foot-bot id="fb_0">
       <body position="-3, 7.7, 0" orientation="0,0,0" />
-      <controller config="genetic_nn"/>
-    </foot-bot>
+      <controller config="genetic_nn" />
+    </foot-bot>-->
 
   </arena>
 

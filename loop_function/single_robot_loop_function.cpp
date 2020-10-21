@@ -114,7 +114,7 @@ void SingleRobotLoopFunction::PostStep()
 
          LOG << "dist: " << reachFinishLine << std::endl;
 
-         LOG << "Avg segment performance after " << segmentsAnalyzed << "segments: "
+         LOG << "Avg segment performance after " << segmentsAnalyzed << " segments: "
              << totalOnSegmentPerformance / segmentsAnalyzed
              << std::endl;
       }

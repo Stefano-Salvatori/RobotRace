@@ -130,7 +130,9 @@ int main(int argc, char **argv)
 
             /* Flush best individual */
             argos::LOG << "   Flushing best individual: "
-                       << cGA.statistics().bestIndividual().score()
+                       << cGA.statistics().bestIndividual().score()                    
+                       << " population avg: "
+                       << cGA.population().ave()
                        << "...";
             if (FlushBest(dynamic_cast<const GARealGenome &>(cGA.statistics().bestIndividual()), cGA.generation()) == 0)
             {
