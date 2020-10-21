@@ -1,0 +1,157 @@
+<?xml version="1.0" ?>
+<argos-configuration>
+
+  <!-- ************************* -->
+  <!-- * General configuration * -->
+  <!-- ************************* -->
+  <framework>
+    <system threads="0" />
+    <experiment length="500" ticks_per_second="10" random_seed="124" />
+  </framework>
+
+  <!-- *************** -->
+  <!-- * Controllers * -->
+  <!-- *************** -->
+  <controllers>
+    <lua_controller id="lua">
+      <actuators>
+       <differential_steering implementation="default" />
+       <leds implementation="default" medium="leds" />
+      </actuators>
+      <sensors>
+        <footbot_proximity implementation="default" show_rays="true" />
+      </sensors>
+
+      <params script="controllers/motor_schema_controller/motor_schema.lua"/>
+    </lua_controller>
+
+  </controllers>
+
+
+  <!-- ****************** -->
+  <!-- * Loop functions * -->
+  <!-- ****************** -->
+  <!--<loop_functions library="build/loop_function/libsingle_robot_loop_function.so" label="single_robot_loop_function" finishSegmentV1="0,-7.5" finishSegmentV2="2,-7.5" 
+    startingSegmentV1="-3,7.5" startingSegmentV2="-3,6.5" debug="true"/>-->
+
+  <!-- *********************** -->
+  <!-- * Arena configuration * -->
+  <!-- *********************** -->
+  <arena size="12, 44, 1" center="0,0,0.5">
+    <!-- Place four boxes in a square to delimit the arena -->
+
+    <box id="wall_north" size="0.1,44,0.5" movable="false">
+      <body position="6,0,0" orientation="0,0,0" />
+    </box>
+    <box id="wall_south" size="0.1,44,0.5" movable="false">
+      <body position="-6,0,0" orientation="0,0,0" />
+    </box>
+   
+    <box id="wall_east" size="12,0.1,0.5" movable="false">
+      <body position="0,-22,0" orientation="0,0,0" />
+    </box>
+    <box id="wall_west" size="12,0.1,0.5" movable="false">
+      <body position="0,22,0" orientation="0,0,0" />
+    </box>
+
+    <!--  end arena -->
+
+    <box id="wall1" size="0.1,8,0.5" movable="false">
+      <body position="0,18,0" orientation="0,0,0" />
+    </box>
+    
+     <box id="wall2" size="0.1,8,0.5" movable="false">
+      <body position="-4,18,0" orientation="0,0,0" />
+    </box>
+
+      <box id="wall1-3" size="0.1,5.66,0.5" movable="false">
+      <body position="2,12,0" orientation="45,0,0" />
+    </box>
+    
+     <box id="wall2-4" size="0.1,5.66,0.5" movable="false">
+      <body position="-2,12,0" orientation="45,0,0" />
+    </box>
+
+
+    
+    <box id="wall3" size="0.1,8,0.5" movable="false">
+      <body position="4,6,0" orientation="0,0,0" />
+    </box>
+    
+     <box id="wall4" size="0.1,8,0.5" movable="false">
+      <body position="0,6,0" orientation="0,0,0" />
+    </box>
+
+
+
+     <box id="wall3-5" size="0.1,5.66,0.5" movable="false">
+      <body position="2,0,0" orientation="-45,0,0" />
+    </box>
+    
+     <box id="wall4-6" size="0.1,5.66,0.5" movable="false">
+      <body position="-2,0,0" orientation="-45,0,0" />
+    </box>
+
+
+        
+    <box id="wall5" size="0.1,8,0.5" movable="false">
+      <body position="0,-6,0" orientation="0,0,0" />
+    </box>
+    
+     <box id="wall6" size="0.1,8,0.5" movable="false">
+      <body position="-4,-6,0" orientation="0,0,0" />
+    </box>
+
+      <box id="wall5-7" size="0.1,5.66,0.5" movable="false">
+      <body position="2,-12,0" orientation="45,0,0" />
+    </box>
+    
+     <box id="wall7-8" size="0.1,5.66,0.5" movable="false">
+      <body position="-2,-12,0" orientation="45,0,0" />
+    </box>
+
+
+    
+        
+    <box id="wall7" size="0.1,8,0.5" movable="false">
+      <body position="4,-18,0" orientation="0,0,0" />
+    </box>
+    
+     <box id="wall8" size="0.1,8,0.5" movable="false">
+      <body position="0,-18,0" orientation="0,0,0" />
+    </box>
+
+
+   
+
+    <!-- Place a foot-bot and bind it to the controller -->
+    <foot-bot id="fb_0">
+      <body position="0, 0, 0" orientation="0,0,0" />
+      <controller config="lua"/>
+    </foot-bot>
+
+  </arena>
+
+  <media>
+    <led id="leds" />
+  </media>
+
+  <physics_engines>
+    <dynamics2d id="dyn2d" />
+  </physics_engines>
+  <media />
+
+
+  <visualization>
+    <qt-opengl>
+      <camera>
+        <placement idx="0" position="2,2,2" look_at="1,1,1" />
+        <placement idx="1" position="0,0,10" look_at="0,0,0" />
+        <placement idx="2" position="3,3,4" look_at="1,6,0" />
+        <placement idx="3" position="2,3,2" look_at="0,1,0" />
+      </camera>
+    </qt-opengl>
+
+  </visualization>
+
+</argos-configuration>
