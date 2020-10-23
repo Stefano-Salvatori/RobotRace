@@ -10,8 +10,11 @@
 #include <argos3/plugins/robots/generic/control_interface/ci_differential_steering_actuator.h>
 /* Definition of the foot-bot proximity sensor */
 #include <argos3/plugins/robots/foot-bot/control_interface/ci_footbot_proximity_sensor.h>
+#include <argos3/plugins/robots/foot-bot/control_interface/ci_footbot_distance_scanner_sensor.h>
+#include <argos3/plugins/robots/foot-bot/control_interface/ci_footbot_distance_scanner_actuator.h>
 
 #include <argos3/plugins/robots/generic/control_interface/ci_leds_actuator.h>
+#include <vector>
 
 #include <controllers/nn/perceptron.h>
 
@@ -29,6 +32,9 @@ private:
 
    /* Pointer to the foot-bot proximity sensor */
    CCI_FootBotProximitySensor *proximity;
+
+   CCI_FootBotDistanceScannerSensor *distanceScannerSensor;
+   CCI_FootBotDistanceScannerActuator *distanceScannerActuator;
 
    /* Pointer to the foot-bot proximity sensor */
    CCI_LEDsActuator *leds;
@@ -79,6 +85,11 @@ public:
     * Called to cleanup what done by Init() when the experiment finishes.
     */
    virtual void Destroy();
+
+   /**
+    * Get the max proximity value read from the sensor
+    */
+   const Real GetMaxProximityValue();
 
    inline CPerceptron &GetPerceptron()
    {

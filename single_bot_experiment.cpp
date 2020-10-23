@@ -1,5 +1,6 @@
 /* GA-related headers */
 #include <ga/ga.h>
+#include <math.h>
 
 /* ARGoS-related headers */
 #include <argos3/core/simulator/simulator.h>
@@ -28,7 +29,7 @@ float LaunchARGoS(GAGenome &c_genome)
     * it is faster. */
     static argos::CSimulator &cSimulator = argos::CSimulator::GetInstance();
     /* Get a reference to the loop functions */
-    static SingleRobotLoopFunction &cLoopFunctions = 
+    static SingleRobotLoopFunction &cLoopFunctions =
         dynamic_cast<SingleRobotLoopFunction &>(cSimulator.GetLoopFunctions());
     /*
     * Run multiple trials and take the worst performance as final value.
@@ -36,6 +37,7 @@ float LaunchARGoS(GAGenome &c_genome)
     Real worstPerformance = 1000000;
     for (size_t i = 0; i < NUM_TRIALS; ++i)
     {
+        cSimulator.SetRandomSeed(random());
         /* Reset the experiment.*/
         cSimulator.Reset();
         /* Configure the controller with the genome */
@@ -44,10 +46,14 @@ float LaunchARGoS(GAGenome &c_genome)
         cSimulator.Execute();
         /* Update performance */
         worstPerformance = Min(worstPerformance, cLoopFunctions.Performance());
-        
     }
     /* Return the result of the evaluation */
     return worstPerformance;
+}
+
+int WriteGenome(std::ofstream outputStream,
+                const GARealGenome &c_genome)
+{
 }
 
 /*
@@ -65,7 +71,7 @@ int FlushBest(const GARealGenome &c_genome,
         cOFS << SimpleController::GENOME_SIZE // first write the number of values to dump
              << " "
              << c_genome // then write the actual values
-             << std::endl;
+             << "\n";
         cOFS.close();
         return 0;
     }
@@ -83,21 +89,21 @@ int main(int argc, char **argv)
     /*
     * Initialize GALIB
     */
-    /* Create an allele whose values can be in the range [-20,20] */
     GAAlleleSet<float> cAlleleSet(-20.0f, 20.0f);
     /* Create a genome using LaunchARGoS() to evaluate it */
     GARealGenome cGenome(SimpleController::GENOME_SIZE, cAlleleSet, LaunchARGoS);
-    /* Create and configure a basic genetic algorithm using the genome */
-    GASimpleGA cGA(cGenome);
+    /* Create and configure a steady state algorithm using the genome */
+    GASteadyStateGA cGA(cGenome);
 
-    cGA.maximize();         // the objective function must be maximized
-    cGA.populationSize(30); // population size for each generation
-    cGA.nGenerations(150);  // number of generations
-    cGA.pMutation(0.15f);   // prob of gene mutation
-    cGA.crossover(GARealTwoPointCrossover);
-    cGA.pCrossover(0.25f);              // prob of gene crossover
-    cGA.scoreFilename("evolution.dat"); // filename for the result log
-    cGA.flushFrequency(1);              // log the results every generation
+    cGA.maximize(); // the objective function must be maximized
+
+    std::ifstream parametersFile("genetic_parameters.conf");
+    cGA.parameters(parametersFile, GABoolean::gaTrue);
+    LOG << "Algorithm parameters: \n"
+        << cGA.parameters() << std::endl;
+
+    // Foreach Generation save best and avg score
+    cGA.selectScores(GAStatistics::Maximum | GAStatistics::Mean);
 
     /*
     * Initialize ARGoS
@@ -115,7 +121,7 @@ int main(int argc, char **argv)
     /*
     * Launch the evolution, setting the random seed
     */
-    cGA.initialize(12345);
+    cGA.initialize(145);
     do
     {
         argos::LOG << "Generation #" << cGA.generation() << "...";
@@ -130,7 +136,7 @@ int main(int argc, char **argv)
 
             /* Flush best individual */
             argos::LOG << "   Flushing best individual: "
-                       << cGA.statistics().bestIndividual().score()                    
+                       << cGA.population().max()
                        << " population avg: "
                        << cGA.population().ave()
                        << "...";

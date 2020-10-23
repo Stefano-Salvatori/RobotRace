@@ -72,8 +72,6 @@
       <body position="-1,5,0" orientation="45,0,0" />
     </box>
 
-
-    
     <box id="wall3" size="0.1,2,0.5" movable="false">
       <body position="2,3,0" orientation="0,0,0" />
     </box>
@@ -82,8 +80,6 @@
       <body position="0,3,0" orientation="0,0,0" />
     </box>
 
-
-
      <box id="wall3-5" size="0.1,5.66,0.5" movable="false">
       <body position="0,0,0" orientation="-45,0,0" />
     </box>
@@ -91,8 +87,6 @@
      <box id="wall4-6" size="0.1,5.66,0.5" movable="false">
       <body position="-2,0,0" orientation="-45,0,0" />
     </box>
-
-
         
     <box id="wall5" size="0.1,1,0.5" movable="false">
       <body position="-2,-2.5,0" orientation="0,0,0" />
@@ -109,9 +103,6 @@
      <box id="wall7-8" size="0.1,6.33,0.5" movable="false">
       <body position="-1,-5,0" orientation="71.57,0,0" />
     </box>
-
-
-    
         
     <box id="wall7" size="0.1,3,0.5" movable="false">
       <body position="4,-6.5,0" orientation="0,0,0" />

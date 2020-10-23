@@ -7,12 +7,15 @@
 #include <argos3/core/utility/logging/argos_log.h>
 
 #define COLLISION_THRESHOLD 0.9
+#define SHORT_RANGE_MAX_DISTANCE 30
+#define LONG_RANGE_MAX_DISTANCE 150
+#define ROTATION_SPEED 50
 
 const Real SimpleController::MAX_VELOCITY = 20.0f;
 
 // Formula for number of parameters:
 //  (Input + 1) * Output
-// Since we have 24 proximity sensors and 2 wheels actuators
+// We have 12 distance values, 12 angles and 2 wheels actuators
 //  (24 + 1) * 2 = 50
 const int SimpleController::GENOME_SIZE = 50;
 
@@ -26,8 +29,16 @@ SimpleController::~SimpleController()
 {
 }
 
-/****************************************/
-/****************************************/
+const Real SimpleController::GetMaxProximityValue()
+{
+    const CCI_FootBotProximitySensor::TReadings &proxReads = proximity->GetReadings();
+    Real maxProximity = proxReads[0].Value;
+    for (size_t i = 0; i < proxReads.size(); ++i)
+    {
+        maxProximity = Max(maxProximity, proxReads[i].Value);
+    }
+    return maxProximity;
+}
 
 void SimpleController::Init(TConfigurationNode &t_node)
 {
@@ -39,6 +50,8 @@ void SimpleController::Init(TConfigurationNode &t_node)
         proximity = GetSensor<CCI_FootBotProximitySensor>("footbot_proximity");
         leds = GetActuator<CCI_LEDsActuator>("leds");
         wheels = GetActuator<CCI_DifferentialSteeringActuator>("differential_steering");
+        distanceScannerSensor = GetSensor<CCI_FootBotDistanceScannerSensor>("footbot_distance_scanner");
+        distanceScannerActuator = GetActuator<CCI_FootBotDistanceScannerActuator>("footbot_distance_scanner");
     }
     catch (CARGoSException &ex)
     {
@@ -48,6 +61,8 @@ void SimpleController::Init(TConfigurationNode &t_node)
     try
     {
         perceptron.Init(t_node);
+        distanceScannerActuator->Enable();
+        distanceScannerActuator->SetRPM(ROTATION_SPEED);
         leds->SetAllColors(FOOTBOT_COLOR);
     }
     catch (CARGoSException &ex)
@@ -56,28 +71,34 @@ void SimpleController::Init(TConfigurationNode &t_node)
     }
 }
 
-/****************************************/
-/****************************************/
-
 void SimpleController::ControlStep()
 {
     /* Get readings from proximity sensor */
-    const CCI_FootBotProximitySensor::TReadings &tProxReads = proximity->GetReadings();
-    Real maxProximity = tProxReads[0].Value;
-
-    /* Fill NN inputs from sensory data and find max proximity value*/
-    for (size_t i = 0; i < tProxReads.size(); ++i)
-    {
-        perceptron.SetInput(i, tProxReads[i].Value);
-        maxProximity = Max(maxProximity, tProxReads[i].Value);
-    }
-    if (maxProximity > 0.9)
-    {
+    Real maxProximity = GetMaxProximityValue();
+    if (maxProximity > COLLISION_THRESHOLD)
         leds->SetAllColors(CColor::RED);
-    }
     else
-    {
         leds->SetAllColors(FOOTBOT_COLOR);
+
+    /* Read from distance sensor; take 6 long range and 6 short range values */
+    size_t i = 0;
+    const CCI_FootBotDistanceScannerSensor::TReadingsMap &tDisranceReads = distanceScannerSensor->GetReadingsMap();
+    for (CCI_FootBotDistanceScannerSensor::TReadingsMap::const_iterator it = tDisranceReads.begin(); it != tDisranceReads.end(); ++it)
+    {
+        ++it;
+        perceptron.SetInput(i++, it->first.GetValue());
+        if (it->second <= 0)
+        {
+            perceptron.SetInput(i++, 0);
+        }
+        else if (it->second < SHORT_RANGE_MAX_DISTANCE)
+        {
+            perceptron.SetInput(i++, 1 - it->second / SHORT_RANGE_MAX_DISTANCE);
+        }
+        else if (it->second < LONG_RANGE_MAX_DISTANCE)
+        {
+            perceptron.SetInput(i++, 1 - it->second / LONG_RANGE_MAX_DISTANCE);
+        }
     }
 
     /* Compute NN outputs */
@@ -105,6 +126,9 @@ void SimpleController::ControlStep()
 void SimpleController::Reset()
 {
     perceptron.Reset();
+    distanceScannerActuator->Enable();
+    distanceScannerActuator->SetRPM(ROTATION_SPEED);
+    leds->SetAllColors(FOOTBOT_COLOR);
 }
 
 void SimpleController::Destroy()

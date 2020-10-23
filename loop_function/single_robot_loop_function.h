@@ -16,15 +16,16 @@
 #include <argos3/plugins/robots/foot-bot/simulator/footbot_entity.h>
 #include <argos3/plugins/robots/generic/control_interface/ci_positioning_sensor.h>
 #include <argos3/plugins/robots/foot-bot/control_interface/ci_footbot_proximity_sensor.h>
+#include <argos3/plugins/simulator/entities/box_entity.h>
 
 /* GA-related headers */
 #include <ga/ga.h>
 #include <ga/GARealGenome.h>
 #include <ga/GARealGenome.C> // this is necessary!
 
-
-/****************************************/
-/****************************************/
+#define NUM_OBSTACLES 6
+#define DEFAULT_OBSTACLE_MIN_SIZE 0.1
+#define DEFAULT_OBSTACLE_MAX_SIZE 0.8
 
 using namespace argos;
 
@@ -50,6 +51,10 @@ private:
    Real *parameters;
    CRandom::CRNG *m_pcRNG;
 
+   CBoxEntity *obstacles[NUM_OBSTACLES];
+   Real obstaclesMinSize = DEFAULT_OBSTACLE_MIN_SIZE;
+   Real obstaclesMaxSize = DEFAULT_OBSTACLE_MAX_SIZE;
+
    inline CVector2 GetFootBotPosition()
    {
       CVector2 cPos;
@@ -67,6 +72,9 @@ private:
       const Real startingY = m_pcRNG->Uniform(startingYRange);
       return CVector3(startingX, startingY, Real(0));
    }
+
+   void AddObstacles();
+   void RemoveObstacles();
 
 public:
    SingleRobotLoopFunction();
