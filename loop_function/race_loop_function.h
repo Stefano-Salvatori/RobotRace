@@ -1,5 +1,5 @@
-#ifndef GENETIC_LOOP_FUNCTION_H
-#define GENETIC_LOOP_FUNCTION_H
+#ifndef RACE_LOOP_FUNCTION_H
+#define RACE_LOOP_FUNCTION_H
 
 /* Utility */
 #include <utility>
@@ -23,22 +23,17 @@
 #include <ga/GARealGenome.h>
 #include <ga/GARealGenome.C> // this is necessary!
 
+#define DEFAULT_NUM_BOTS 2
 #define NUM_OBSTACLES 6
 #define DEFAULT_OBSTACLE_MIN_SIZE 0.1
 #define DEFAULT_OBSTACLE_MAX_SIZE 0.8
 
 using namespace argos;
 
-class SingleRobotLoopFunction : public CLoopFunctions
+class RaceLoopFunction : public CLoopFunctions
 {
 private:
-   size_t stepCount;
-   Real totalStepProximity;
-   Real totalStepRightWheelSpeed;
-   Real totalStepLeftWheelSpeed;
-
-   Real totalOnSegmentPerformance;
-
+   int numBots = DEFAULT_NUM_BOTS;
    //Finish line of the race (as a pair of point that defines the vertices of a segment)
    CVector2 finishSegmentV1;
    CVector2 finishSegmentV2;
@@ -46,48 +41,36 @@ private:
    //Starting line of the race (as a pair of point that defines the vertices of a segment)
    CVector2 startingSegmentV1;
    CVector2 startingSegmentV2;
-   CFootBotEntity *footBot;
-   GeneticController *controller;
-   Real *parameters;
+
+   std::vector<CFootBotEntity> bots;
+   std::vector<CCI_Controller> controllers;
+
    CRandom::CRNG *m_pcRNG;
 
    CBoxEntity *obstacles[NUM_OBSTACLES];
    Real obstaclesMinSize = DEFAULT_OBSTACLE_MIN_SIZE;
    Real obstaclesMaxSize = DEFAULT_OBSTACLE_MAX_SIZE;
 
-   inline CVector2 GetFootBotPosition()
+   inline CVector2 GetFootBotPosition(size_t index = 0)
    {
       CVector2 cPos;
-      cPos.Set(footBot->GetEmbodiedEntity().GetOriginAnchor().Position.GetX(),
-               footBot->GetEmbodiedEntity().GetOriginAnchor().Position.GetY());
+      cPos.Set(bots[index].GetEmbodiedEntity().GetOriginAnchor().Position.GetX(),
+               bots[index].GetEmbodiedEntity().GetOriginAnchor().Position.GetY());
       return cPos;
-   }
-
-   inline CVector3 GetRandomStartingPosition()
-   {
-      CRange<Real> startingXRange = RangeX(this->startingSegmentV1, this->startingSegmentV2);
-      CRange<Real> startingYRange = RangeY(this->startingSegmentV1, this->startingSegmentV2);
-      /* Set the position uniformly in the starting line*/
-      const Real startingX = m_pcRNG->Uniform(startingXRange);
-      const Real startingY = m_pcRNG->Uniform(startingYRange);
-      return CVector3(startingX, startingY, Real(0));
    }
 
    void AddObstacles();
    void RemoveObstacles();
 
 public:
-   SingleRobotLoopFunction();
-   virtual ~SingleRobotLoopFunction();
+   RaceLoopFunction();
+   virtual ~RaceLoopFunction();
 
    virtual void Init(TConfigurationNode &t_node);
    virtual void PreStep();
    virtual void PostStep();
    virtual void Reset();
    virtual bool IsExperimentFinished();
-
-   /* Configures the robot controller from the genome */
-   void ConfigureFromGenome(const GARealGenome &c_genome);
 
    /* Calculates the performance of the robot in a trial */
    Real Performance();

@@ -7,7 +7,6 @@
 #include <argos3/core/simulator/loop_functions.h>
 
 #include <loop_function/single_robot_loop_function.h>
-#include <omp.h>
 
 //Number of trials foreach genome
 #define NUM_TRIALS 5
@@ -73,7 +72,7 @@ int FlushBest(const GARealGenome &c_genome,
     std::ofstream cOFS(cOSS.str().c_str(), std::ios::out | std::ios::trunc);
     if (cOFS.is_open())
     {
-        cOFS << SimpleController::GENOME_SIZE // first write the number of values to dump
+        cOFS << GeneticController::GENOME_SIZE // first write the number of values to dump
              << " "
              << c_genome // then write the actual values
              << "\n";
@@ -94,9 +93,9 @@ int main(int argc, char **argv)
     /*
     * Initialize GALIB
     */
-    GAAlleleSet<float> cAlleleSet(-5.0f, 5.0f);
+    GAAlleleSet<float> cAlleleSet(-15.0f, 15.0f);
     /* Create a genome using LaunchARGoS() to evaluate it */
-    GARealGenome cGenome(SimpleController::GENOME_SIZE, cAlleleSet, LaunchARGoS);
+    GARealGenome cGenome(GeneticController::GENOME_SIZE, cAlleleSet, LaunchARGoS);
 
     GASteadyStateGA cGA(cGenome);
     cGA.maximize(); // the objective function must be maximized

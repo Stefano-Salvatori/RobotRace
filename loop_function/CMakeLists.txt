@@ -7,15 +7,8 @@ add_library(single_robot_loop_function SHARED
   single_robot_loop_function.cpp
 )
 
-add_library(multi_robot_loop_function SHARED 
-  utils/utils.h
-  utils/utils.cpp
-  multi_robot_loop_function.h
-  multi_robot_loop_function.cpp
-)
-
-target_link_libraries(multi_robot_loop_function
-  advanced_controller
+target_link_libraries(single_robot_loop_function
+  genetic_controller
   argos3core_simulator
   argos3plugin_simulator_dynamics2d
   argos3plugin_simulator_entities
@@ -24,8 +17,15 @@ target_link_libraries(multi_robot_loop_function
   argos3plugin_simulator_media
   ${GALIB_LIBRARIES})
 
-target_link_libraries(single_robot_loop_function
-  simple_controller
+  add_library(race_loop_function SHARED 
+  utils/utils.h
+  utils/utils.cpp
+  race_loop_function.h
+  race_loop_function.cpp
+)
+
+target_link_libraries(race_loop_function
+  genetic_controller
   argos3core_simulator
   argos3plugin_simulator_dynamics2d
   argos3plugin_simulator_entities

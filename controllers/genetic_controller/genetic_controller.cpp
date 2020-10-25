@@ -1,5 +1,5 @@
 /* Include the controller definition */
-#include "simple_controller.h"
+#include "genetic_controller.h"
 /* Function definitions for XML parsing */
 #include <argos3/core/utility/configuration/argos_configuration.h>
 /* 2D vector definition */
@@ -11,25 +11,25 @@
 #define LONG_RANGE_MAX_DISTANCE 150
 #define ROTATION_SPEED 50
 
-const Real SimpleController::MAX_VELOCITY = 20.0f;
+const Real GeneticController::MAX_VELOCITY = 20.0f;
 
 // Formula for number of parameters:
 //  (Input + 1) * Output
 // We have 12 distance values, 12 angles and 2 wheels actuators
 //  (24 + 1) * 2 = 50
-const int SimpleController::GENOME_SIZE = 50;
+const int GeneticController::GENOME_SIZE = 50;
 
 static CRange<Real> NN_OUTPUT_RANGE(0.0f, 1.0f);
-static CRange<Real> WHEEL_ACTUATION_RANGE(-SimpleController::MAX_VELOCITY, SimpleController::MAX_VELOCITY);
+static CRange<Real> WHEEL_ACTUATION_RANGE(-GeneticController::MAX_VELOCITY, GeneticController::MAX_VELOCITY);
 static const CColor FOOTBOT_COLOR = CColor::GREEN;
 
-SimpleController::SimpleController() {}
+GeneticController::GeneticController() {}
 
-SimpleController::~SimpleController()
+GeneticController::~GeneticController()
 {
 }
 
-const Real SimpleController::GetMaxProximityValue()
+const Real GeneticController::GetMaxProximityValue()
 {
     const CCI_FootBotProximitySensor::TReadings &proxReads = proximity->GetReadings();
     Real maxProximity = proxReads[0].Value;
@@ -40,7 +40,7 @@ const Real SimpleController::GetMaxProximityValue()
     return maxProximity;
 }
 
-void SimpleController::Init(TConfigurationNode &t_node)
+void GeneticController::Init(TConfigurationNode &t_node)
 {
     /*
     * Get sensor/actuator handles
@@ -71,7 +71,7 @@ void SimpleController::Init(TConfigurationNode &t_node)
     }
 }
 
-void SimpleController::ControlStep()
+void GeneticController::ControlStep()
 {
     /* Get readings from proximity sensor */
     Real maxProximity = GetMaxProximityValue();
@@ -123,7 +123,7 @@ void SimpleController::ControlStep()
         rightSpeed);
 }
 
-void SimpleController::Reset()
+void GeneticController::Reset()
 {
     perceptron.Reset();
     distanceScannerActuator->Enable();
@@ -131,7 +131,7 @@ void SimpleController::Reset()
     leds->SetAllColors(FOOTBOT_COLOR);
 }
 
-void SimpleController::Destroy()
+void GeneticController::Destroy()
 {
     perceptron.Destroy();
 }
@@ -145,4 +145,4 @@ void SimpleController::Destroy()
  * When ARGoS reads that string in the configuration file, it knows which
  * controller class to instantiate.
  */
-REGISTER_CONTROLLER(SimpleController, "simple_controller")
+REGISTER_CONTROLLER(GeneticController, "genetic_controller")

@@ -24,7 +24,7 @@
  */
 using namespace argos;
 
-class SimpleController : public CCI_Controller
+class GeneticController : public CCI_Controller
 {
 private:
    /* Pointer to the differential steering actuator */
@@ -57,10 +57,10 @@ public:
    static const int GENOME_SIZE;
 
    /* Class constructor. */
-   SimpleController();
+   GeneticController();
 
    /* Class destructor. */
-   virtual ~SimpleController();
+   virtual ~GeneticController();
 
    /*
     * This function initializes the controller.

@@ -22,7 +22,7 @@ SingleRobotLoopFunction::SingleRobotLoopFunction() : stepCount(0),
                                                      totalOnSegmentPerformance(0),
                                                      footBot(NULL),
                                                      controller(NULL),
-                                                     parameters(new Real[SimpleController::GENOME_SIZE]),
+                                                     parameters(new Real[GeneticController::GENOME_SIZE]),
                                                      m_pcRNG(NULL)
 {
 }
@@ -76,7 +76,7 @@ void SingleRobotLoopFunction::Init(TConfigurationNode &t_node)
        "genetic_nn" // controller id as set in the XML
    );
    AddEntity(*footBot);
-   controller = &dynamic_cast<SimpleController &>(footBot->GetControllableEntity().GetController());
+   controller = &dynamic_cast<GeneticController &>(footBot->GetControllableEntity().GetController());
 
    /* Add Random obstacles in the map */
    AddObstacles();
@@ -125,8 +125,8 @@ void SingleRobotLoopFunction::PostStep()
       const Real avoidCollisions = 1 - this->totalStepProximity / SEGMENT_LENGTH;
 
       //velocity scaled to [-1, 1]
-      const Real avgRightSpeed = (this->totalStepRightWheelSpeed / SEGMENT_LENGTH) / SimpleController::MAX_VELOCITY;
-      const Real avgLeftSpeed = (this->totalStepLeftWheelSpeed / SEGMENT_LENGTH) / SimpleController::MAX_VELOCITY;
+      const Real avgRightSpeed = (this->totalStepRightWheelSpeed / SEGMENT_LENGTH) / GeneticController::MAX_VELOCITY;
+      const Real avgLeftSpeed = (this->totalStepLeftWheelSpeed / SEGMENT_LENGTH) / GeneticController::MAX_VELOCITY;
       const Real goStraight = 1 / (1 + abs(avgRightSpeed - avgLeftSpeed));
       const Real goFast = abs((avgRightSpeed + avgLeftSpeed) / 2);
 
