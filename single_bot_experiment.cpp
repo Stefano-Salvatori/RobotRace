@@ -34,7 +34,7 @@ float LaunchARGoS(GAGenome &c_genome)
     /*
     * Run multiple trials and take the worst performance as final value.
     */
-    Real worstPerformance = 1000000;
+    Real worstPerformance = 1000;
     // Real tot = 0;
 
     for (size_t i = 0; i < NUM_TRIALS; ++i)
@@ -64,10 +64,11 @@ int WriteGenome(std::ofstream outputStream,
  * Flush best individual
  */
 int FlushBest(const GARealGenome &c_genome,
-              size_t un_generation)
+              size_t un_generation,
+              char *folderName)
 {
     std::ostringstream cOSS;
-    cOSS << "best_single/"
+    cOSS << folderName << "/"
          << "best_" << un_generation << ".dat";
     std::ofstream cOFS(cOSS.str().c_str(), std::ios::out | std::ios::trunc);
     if (cOFS.is_open())
@@ -90,6 +91,12 @@ int FlushBest(const GARealGenome &c_genome,
 
 int main(int argc, char **argv)
 {
+    if (argc < 2)
+    {
+        std::cerr << "Pass the folder name where the algorithm intermediate files will be stored." << std::endl;
+        return 1;
+    }
+    char *folder = argv[1];
     /*
     * Initialize GALIB
     */
@@ -99,6 +106,7 @@ int main(int argc, char **argv)
 
     GASteadyStateGA cGA(cGenome);
     cGA.maximize(); // the objective function must be maximized
+    cGA.crossover(GARealTwoPointCrossover);
 
     // load parameters
     std::ifstream parametersFile("genetic_parameters.conf");
@@ -106,10 +114,14 @@ int main(int argc, char **argv)
     LOG << "Algorithm parameters: \n"
         << cGA.parameters() << std::endl;
 
-    cGA.crossover(GARealOnePointCrossover);
-
-    // foreach generation save best and avg score
-    cGA.selectScores(GAStatistics::AllScores);
+    //write algorith marameters in the a conf file inside the algorithm sfolder
+    std::ostringstream cOSS;
+    cOSS << folder << "/"
+         << "parameters.conf";
+    std::ofstream cOFS(cOSS.str().c_str(), std::ios::out | std::ios::trunc);
+    cOFS << cGA.parameters()
+         << "\n";
+    cOFS.close();
 
     /*
     * Initialize ARGoS
@@ -127,7 +139,7 @@ int main(int argc, char **argv)
     /*
     * Launch the evolution, setting the random seed
     */
-    cGA.initialize(145);
+    cGA.initialize(132);
     do
     {
         argos::LOG << "Generation #" << cGA.generation() << "...";
@@ -146,7 +158,10 @@ int main(int argc, char **argv)
                        << " population avg: "
                        << cGA.population().ave()
                        << "...";
-            if (FlushBest(dynamic_cast<const GARealGenome &>(cGA.statistics().bestIndividual()), cGA.generation()) == 0)
+            if (FlushBest(
+                    dynamic_cast<const GARealGenome &>(cGA.statistics().bestIndividual()),
+                    cGA.generation(),
+                    folder) == 0)
             {
                 argos::LOG << " done.";
             }

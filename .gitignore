@@ -1,6 +1,7 @@
 build/*
 best/*
 best_single*/*
+genetic*/*
 
 .vscode/*
 *.dat

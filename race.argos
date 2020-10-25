@@ -23,7 +23,7 @@
                 <footbot_proximity implementation="default" show_rays="false" />
                 <footbot_distance_scanner implementation="rot_z_only" show_rays="false" />
             </sensors>
-            <params num_inputs="24" num_outputs="2" parameter_file="best_single_obs/best_200.dat" />
+            <params num_inputs="24" num_outputs="2" parameter_file="genetic_1/best_200.dat" />
         </genetic_controller>
 
 

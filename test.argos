@@ -13,7 +13,7 @@
   <!-- * Controllers * -->
   <!-- *************** -->
   <controllers>
-    <simple_controller id="genetic_nn" library="build/controllers/libsimple_controller.so">
+    <genetic_controller id="genetic_nn" library="build/controllers/libgenetic_controller.so">
       <actuators>
         <differential_steering implementation="default" />
         <leds implementation="default" medium="leds" />
@@ -24,7 +24,7 @@
         <footbot_distance_scanner implementation="rot_z_only" show_rays="true" />
       </sensors>
       <params num_inputs="24" num_outputs="2" parameter_file="best_single/best_200.dat" />
-    </simple_controller>
+    </genetic_controller>
 
     <!-- <lua_controller id="lua"> <actuators> <differential_steering implementation="default" /> <leds implementation="default" medium="leds" /> </actuators> <sensors> <footbot_proximity implementation="default" show_rays="true" /> </sensors> <params script="controllers/dumb_controller/dumb_controller.lua" /> </lua_controller> -->
 
@@ -116,10 +116,6 @@
     <box id="wall8" size="0.1,2,0.5" movable="false">
       <body position="2,-7,0" orientation="0,0,0" />
     </box>
-
-
-    <!-- Place a foot-bot and bind it to the controller -->
-    <foot-bot id="fb_0"> <body position="-1, 7.5, 0" orientation="-90,0,0" /> <controller config="genetic_nn" /> </foot-bot>
   </arena>
 
   <media>
