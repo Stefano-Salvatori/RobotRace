@@ -1,6 +1,7 @@
 /* GA-related headers */
 #include <ga/ga.h>
 #include <math.h>
+#include <time.h>
 
 /* ARGoS-related headers */
 #include <argos3/core/simulator/simulator.h>
@@ -35,11 +36,11 @@ float LaunchARGoS(GAGenome &c_genome)
     * Run multiple trials and take the worst performance as final value.
     */
     Real worstPerformance = 1000;
-    // Real tot = 0;
 
+    srand(time(NULL));
     for (size_t i = 0; i < NUM_TRIALS; ++i)
     {
-        cSimulator.SetRandomSeed(random());
+        cSimulator.SetRandomSeed(rand());
         /* Reset the experiment.*/
         cSimulator.Reset();
         /* Configure the controller with the genome */
@@ -48,10 +49,8 @@ float LaunchARGoS(GAGenome &c_genome)
         cSimulator.Execute();
         /* Update performance */
         worstPerformance = Min(worstPerformance, cLoopFunctions.Performance());
-        // tot +=cLoopFunctions.Performance();
     }
-    /* Return the result of the evaluation */
-    // return tot / NUM_TRIALS;
+
     return worstPerformance;
 }
 
@@ -106,7 +105,7 @@ int main(int argc, char **argv)
 
     GASteadyStateGA cGA(cGenome);
     cGA.maximize(); // the objective function must be maximized
-    cGA.crossover(GARealTwoPointCrossover);
+    cGA.crossover(GARealUniformCrossover);
 
     // load parameters
     std::ifstream parametersFile("genetic_parameters.conf");

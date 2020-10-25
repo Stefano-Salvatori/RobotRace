@@ -1,4 +1,5 @@
 #include "race_loop_function.h"
+#include <sstream>
 
 // The experiment finishes when the robot is less then MIN_DISTANCE_FROM_FINISH distant from the finish line
 #define MIN_DISTANCE_FROM_FINISH 0.01
@@ -61,15 +62,31 @@ void RaceLoopFunction ::Init(TConfigurationNode &t_node)
     bots.reserve(numBots);
     controllers.reserve(numBots);
 
+    
+    std::string controllersNames;
+    GetNodeAttributeOrDefault(t_node, "controllers", controllersNames, std::string(""));
+
+    //èarse controller names as comma separated string
+    std::vector<std::string> controllersParsed;
+    std::stringstream s_stream(controllersNames); //create string stream from the string
+    while (s_stream.good())
+    {
+        std::string substr;
+        getline(s_stream, substr, ','); //get first string delimited by comma
+        controllersParsed.push_back(substr);
+        LOG << substr << std::endl;
+    }
+
+    // create footbots (each footbot as a different controller)
     for (size_t botsIndex = 0; botsIndex < numBots; botsIndex++)
     {
         CFootBotEntity *bot = new CFootBotEntity(
-            "fb" + ToString(botsIndex), // entity id
-            "genetic_nn"                // controller id as set in the XML
+            "fb" + ToString(botsIndex),                           // entity id
+            controllersParsed[botsIndex % controllersParsed.size()] // controller id as set in the XML
         );
         bots.push_back(*bot);
         AddEntity(*bot);
-        controllers.push_back(dynamic_cast<GeneticController &>(bot->GetControllableEntity().GetController()));
+        controllers.push_back(bot->GetControllableEntity().GetController());
     }
 
     /* Add Random obstacles in the map */
@@ -94,6 +111,7 @@ void RaceLoopFunction ::Init(TConfigurationNode &t_node)
         GetNodeAttributeOrDefault(t_node, "obstaclesMinSize", this->obstaclesMinSize, DEFAULT_OBSTACLE_MIN_SIZE);
         GetNodeAttributeOrDefault(t_node, "obstaclesMaxSize", this->obstaclesMaxSize, DEFAULT_OBSTACLE_MAX_SIZE);
 
+        //Initialize footbot positions
         Reset();
     }
     catch (CARGoSException &ex)
@@ -103,19 +121,16 @@ void RaceLoopFunction ::Init(TConfigurationNode &t_node)
 
 void RaceLoopFunction ::PreStep()
 {
-    LOG << "Ciao PreStep" << std::endl;
 }
 
 void RaceLoopFunction ::PostStep()
 {
-    LOG << "Ciao PostStep" << std::endl;
 }
 
 bool RaceLoopFunction ::IsExperimentFinished()
 {
     for (size_t i = 0; i < bots.size(); i++)
     {
-        LOG << "Ciao \n";
         if (DistanceFromSegment(GetFootBotPosition(i), this->finishSegmentV1, this->finishSegmentV2) < MIN_DISTANCE_FROM_FINISH)
         {
             return true;
@@ -133,7 +148,7 @@ void RaceLoopFunction ::Reset()
         // Move robot to the initial position
         const CVector2 pos = SubdivideSegment(startingSegmentV1, startingSegmentV2, (i * 2 + 1) / (bots.size() * 2.0));
         CQuaternion orientation;
-        orientation = orientation.FromEulerAngles(CRadians::ZERO, CRadians::ZERO, CRadians::ZERO);
+        orientation = orientation.FromEulerAngles(-CRadians::PI_OVER_TWO, CRadians::ZERO, CRadians::ZERO);
         if (!MoveEntity(
                 bots[i].GetEmbodiedEntity(),         // move the body of the robot
                 CVector3(pos.GetX(), pos.GetY(), 0), // to this position
