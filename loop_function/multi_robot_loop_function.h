@@ -16,6 +16,7 @@
 #include <argos3/plugins/robots/foot-bot/simulator/footbot_entity.h>
 #include <argos3/plugins/robots/generic/control_interface/ci_positioning_sensor.h>
 #include <argos3/plugins/robots/foot-bot/control_interface/ci_footbot_proximity_sensor.h>
+#include <argos3/plugins/simulator/entities/box_entity.h>
 
 /* GA-related headers */
 #include <ga/ga.h>
@@ -25,9 +26,12 @@
 /****************************************/
 /****************************************/
 
+/****************************************/
+/****************************************/
 
-/****************************************/
-/****************************************/
+#define NUM_OBSTACLES 6
+#define DEFAULT_OBSTACLE_MIN_SIZE 0.1
+#define DEFAULT_OBSTACLE_MAX_SIZE 0.8
 
 using namespace argos;
 
@@ -53,12 +57,15 @@ private:
     CFootBotEntity *mainFootbot;
     AdvancedController *mainController;
 
-
     CFootBotEntity *opponentFootbot;
     AdvancedController *opponentController;
 
     Real *controllerParameters;
     CRandom::CRNG *m_pcRNG;
+
+    CBoxEntity *obstacles[NUM_OBSTACLES];
+    Real obstaclesMinSize = DEFAULT_OBSTACLE_MIN_SIZE;
+    Real obstaclesMaxSize = DEFAULT_OBSTACLE_MAX_SIZE;
 
     inline CVector2 GetFootbotPosition(CFootBotEntity *footbot)
     {
@@ -67,6 +74,9 @@ private:
                  footbot->GetEmbodiedEntity().GetOriginAnchor().Position.GetY());
         return cPos;
     }
+
+    void AddObstacles();
+    void RemoveObstacles();
 
 public:
     MultiRobotLoopFunction();
@@ -78,7 +88,8 @@ public:
     virtual void Reset();
     virtual bool IsExperimentFinished();
 
-    inline void SetCurrentGeneration(size_t gen) {
+    inline void SetCurrentGeneration(size_t gen)
+    {
         currentGeneration = gen;
     }
 

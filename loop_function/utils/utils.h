@@ -27,4 +27,9 @@ CRange<Real> RangeY(const CVector2 &v1, const CVector2 &v2);
  */
 CVector2 SubdivideSegment(const CVector2 &v1, const CVector2 &v2, Real k);
 
+/**
+ * Return the angle between two points
+ */
+Real AngleBetweenPoints(const CVector2 &v1, const CVector2 &v2);
+
 #endif

@@ -20,10 +20,10 @@
         <footbot_distance_scanner implementation="default" />
       </actuators>
       <sensors>
-        <footbot_proximity implementation="default" show_rays="true" />
-        <footbot_distance_scanner implementation="rot_z_only" show_rays="false" />
+        <footbot_proximity implementation="default" show_rays="false" />
+        <footbot_distance_scanner implementation="rot_z_only" show_rays="true" />
       </sensors>
-      <params num_inputs="24" num_outputs="2" parameter_file="best_single/best_115.dat" />
+      <params num_inputs="24" num_outputs="2" parameter_file="best_single/best_200.dat" />
     </simple_controller>
 
     <!-- <lua_controller id="lua"> <actuators> <differential_steering implementation="default" /> <leds implementation="default" medium="leds" /> </actuators> <sensors> <footbot_proximity implementation="default" show_rays="true" /> </sensors> <params script="controllers/dumb_controller/dumb_controller.lua" /> </lua_controller> -->
@@ -119,7 +119,7 @@
 
 
     <!-- Place a foot-bot and bind it to the controller -->
-    <!-- <foot-bot id="fb_0"> <body position="-1, 7.5, 0" orientation="-90,0,0" /> <controller config="genetic_nn" /> </foot-bot> -->
+    <foot-bot id="fb_0"> <body position="-1, 7.5, 0" orientation="-90,0,0" /> <controller config="genetic_nn" /> </foot-bot>
   </arena>
 
   <media>

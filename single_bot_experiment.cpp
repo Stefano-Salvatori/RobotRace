@@ -7,6 +7,7 @@
 #include <argos3/core/simulator/loop_functions.h>
 
 #include <loop_function/single_robot_loop_function.h>
+#include <omp.h>
 
 //Number of trials foreach genome
 #define NUM_TRIALS 5
@@ -35,6 +36,8 @@ float LaunchARGoS(GAGenome &c_genome)
     * Run multiple trials and take the worst performance as final value.
     */
     Real worstPerformance = 1000000;
+    // Real tot = 0;
+
     for (size_t i = 0; i < NUM_TRIALS; ++i)
     {
         cSimulator.SetRandomSeed(random());
@@ -46,8 +49,10 @@ float LaunchARGoS(GAGenome &c_genome)
         cSimulator.Execute();
         /* Update performance */
         worstPerformance = Min(worstPerformance, cLoopFunctions.Performance());
+        // tot +=cLoopFunctions.Performance();
     }
     /* Return the result of the evaluation */
+    // return tot / NUM_TRIALS;
     return worstPerformance;
 }
 
@@ -89,21 +94,23 @@ int main(int argc, char **argv)
     /*
     * Initialize GALIB
     */
-    GAAlleleSet<float> cAlleleSet(-20.0f, 20.0f);
+    GAAlleleSet<float> cAlleleSet(-5.0f, 5.0f);
     /* Create a genome using LaunchARGoS() to evaluate it */
     GARealGenome cGenome(SimpleController::GENOME_SIZE, cAlleleSet, LaunchARGoS);
-    /* Create and configure a steady state algorithm using the genome */
-    GASteadyStateGA cGA(cGenome);
 
+    GASteadyStateGA cGA(cGenome);
     cGA.maximize(); // the objective function must be maximized
 
+    // load parameters
     std::ifstream parametersFile("genetic_parameters.conf");
     cGA.parameters(parametersFile, GABoolean::gaTrue);
     LOG << "Algorithm parameters: \n"
         << cGA.parameters() << std::endl;
 
-    // Foreach Generation save best and avg score
-    cGA.selectScores(GAStatistics::Maximum | GAStatistics::Mean);
+    cGA.crossover(GARealOnePointCrossover);
+
+    // foreach generation save best and avg score
+    cGA.selectScores(GAStatistics::AllScores);
 
     /*
     * Initialize ARGoS

@@ -88,17 +88,19 @@ int main(int argc, char **argv)
     GAAlleleSet<float> cAlleleSet(-20.0f, 20.0f);
     /* Create a genome using LaunchARGoS() to evaluate it */
     GARealGenome cGenome(AdvancedController::GENOME_SIZE, cAlleleSet, LaunchARGoS);
-    /* Create and configure a basic genetic algorithm using the genome */
-    GASimpleGA cGA(cGenome);
+    GASteadyStateGA cGA(cGenome);
+    cGA.maximize(); // the objective function must be maximized
 
-    cGA.maximize();         // the objective function must be maximized
-    cGA.populationSize(20); // population size for each generation
-    cGA.nGenerations(100);  // number of generations
-    cGA.pMutation(0.25f);   // prob of gene mutation
+    // load parameters
+    std::ifstream parametersFile("genetic_parameters.conf");
+    cGA.parameters(parametersFile, GABoolean::gaTrue);
+    LOG << "Algorithm parameters: \n"
+        << cGA.parameters() << std::endl;
+
     cGA.crossover(GARealOnePointCrossover);
-    cGA.pCrossover(0.25f);              // prob of gene crossover
-    cGA.scoreFilename("evolution.dat"); // filename for the result log
-    cGA.flushFrequency(1);              // log the results every generation
+
+    // foreach generation save best and avg score
+    cGA.selectScores(GAStatistics::AllScores);
 
     /*
     * Initialize ARGoS
@@ -131,7 +133,9 @@ int main(int argc, char **argv)
 
             /* Flush best individual */
             argos::LOG << "   Flushing best individual: "
-                       << dynamic_cast<const GARealGenome &>(cGA.statistics().bestIndividual()).score()
+                       << cGA.population().max()
+                       << " population avg: "
+                       << cGA.population().ave()
                        << "...";
             if (FlushBest(dynamic_cast<const GARealGenome &>(cGA.statistics().bestIndividual()), cGA.generation()) == 0)
             {

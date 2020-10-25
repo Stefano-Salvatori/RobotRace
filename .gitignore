@@ -1,5 +1,7 @@
 build/*
 best/*
+best_single*/*
+
 .vscode/*
 *.dat
 

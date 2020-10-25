@@ -13,7 +13,8 @@
 #include <argos3/plugins/robots/generic/control_interface/ci_positioning_sensor.h>
 #include <argos3/plugins/robots/generic/control_interface/ci_range_and_bearing_actuator.h>
 #include <argos3/plugins/robots/generic/control_interface/ci_range_and_bearing_sensor.h>
-
+#include <argos3/plugins/robots/foot-bot/control_interface/ci_footbot_distance_scanner_sensor.h>
+#include <argos3/plugins/robots/foot-bot/control_interface/ci_footbot_distance_scanner_actuator.h>
 
 #include <argos3/plugins/robots/generic/control_interface/ci_leds_actuator.h>
 
@@ -43,10 +44,14 @@ private:
 
    CCI_RangeAndBearingSensor *rabSensor;
 
+   CCI_FootBotDistanceScannerSensor *distanceScannerSensor;
+   CCI_FootBotDistanceScannerActuator *distanceScannerActuator;
+
    /* Wheel speeds */
    Real leftSpeed, rightSpeed = 0.0;
 
    Real distanceFromOpponent = -1;
+   Real angleFromOpponent = -1;
 
    CPerceptron perceptron;
 
@@ -86,6 +91,11 @@ public:
     */
    virtual void Destroy();
 
+   /**
+    * Get the max proximity value read from the sensor
+    */
+   const Real GetMaxProximityValue();
+
    inline CPerceptron &GetPerceptron()
    {
       return perceptron;
@@ -106,8 +116,14 @@ public:
       return rightSpeed;
    }
 
-   inline void SetDistanceFromOpponent(Real dist) {
+   inline void SetDistanceFromOpponent(Real dist)
+   {
       distanceFromOpponent = dist;
+   }
+
+   inline void SetAngleFromOpponent(Real angle)
+   {
+      angleFromOpponent = angle;
    }
 };
 

@@ -89,7 +89,7 @@ void SimpleController::ControlStep()
         perceptron.SetInput(i++, it->first.GetValue());
         if (it->second <= 0)
         {
-            perceptron.SetInput(i++, 0);
+            perceptron.SetInput(i++, it->second);
         }
         else if (it->second < SHORT_RANGE_MAX_DISTANCE)
         {

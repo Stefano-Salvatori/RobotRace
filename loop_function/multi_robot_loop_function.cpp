@@ -1,9 +1,19 @@
 #include "multi_robot_loop_function.h"
 
-#define SAMPLE_STEP_VALUE 10
+#define SEGMENT_LENGTH 10
 
 // The experiment finishes when the robot is less then MIN_DISTANCE_FROM_FINISH distant from the finish line
 #define MIN_DISTANCE_FROM_FINISH 0.01
+
+bool DEBUG = false;
+const CVector3 OBSTACLE_POSITIONS[NUM_OBSTACLES] = {
+    CVector3(0, 5, 0),
+    CVector3(1, 4, 0),
+    CVector3(0, 1, 0),
+    CVector3(-1, 0, 0),
+    CVector3(-1, -4, 0),
+    CVector3(1, -5, 0),
+};
 
 MultiRobotLoopFunction::MultiRobotLoopFunction() : stepCount(0),
                                                    totalStepProximity(0),
@@ -25,6 +35,32 @@ MultiRobotLoopFunction::MultiRobotLoopFunction() : stepCount(0),
 MultiRobotLoopFunction::~MultiRobotLoopFunction()
 {
     delete[] controllerParameters;
+}
+
+void MultiRobotLoopFunction::RemoveObstacles()
+{
+    for (size_t i = 0; i < NUM_OBSTACLES; i++)
+    {
+        RemoveEntity(*this->obstacles[i]);
+    }
+}
+
+void MultiRobotLoopFunction::AddObstacles()
+{
+    CRange<Real> positionRange = CRange<Real>(-1.0, 1.0);
+    CRange<Real> dimensionRange = CRange<Real>(obstaclesMinSize, obstaclesMaxSize);
+    CRange<CRadians> angleRange = CRange<CRadians>(-CRadians::PI_OVER_THREE, CRadians::PI_OVER_THREE);
+    for (size_t i = 0; i < NUM_OBSTACLES; i++)
+    {
+        const CVector3 basePosition = OBSTACLE_POSITIONS[i];
+        this->obstacles[i] = new CBoxEntity(
+            "o" + ToString(i),
+            CVector3(basePosition.GetX() + m_pcRNG->Uniform(positionRange), basePosition.GetY(), basePosition.GetZ()),
+            CQuaternion().FromEulerAngles(m_pcRNG->Uniform(angleRange), CRadians::ZERO, CRadians::ZERO),
+            false,
+            CVector3(m_pcRNG->Uniform(dimensionRange), 0.1, 0.5));
+        AddEntity(*this->obstacles[i]);
+    }
 }
 
 /****************************************/
@@ -51,6 +87,8 @@ void MultiRobotLoopFunction::Init(TConfigurationNode &t_node)
     AddEntity(*opponentFootbot);
     opponentController = &dynamic_cast<AdvancedController &>(opponentFootbot->GetControllableEntity().GetController());
 
+    /* Add Random obstacles in the map */
+    AddObstacles();
     /*
     * Process trial information, if any
     */
@@ -63,6 +101,11 @@ void MultiRobotLoopFunction::Init(TConfigurationNode &t_node)
         //Get starting position from configuration file
         GetNodeAttributeOrDefault(t_node, "startingSegmentV1", this->startingSegmentV1, CVector2(0, 0));
         GetNodeAttributeOrDefault(t_node, "startingSegmentV2", this->startingSegmentV2, CVector2(0, 0));
+
+        //Get obsacles dimensions
+        GetNodeAttributeOrDefault(t_node, "obstaclesMinSize", this->obstaclesMinSize, DEFAULT_OBSTACLE_MIN_SIZE);
+        GetNodeAttributeOrDefault(t_node, "obstaclesMaxSize", this->obstaclesMaxSize, DEFAULT_OBSTACLE_MAX_SIZE);
+
         Reset();
     }
     catch (CARGoSException &ex)
@@ -77,33 +120,44 @@ void MultiRobotLoopFunction::PreStep()
 void MultiRobotLoopFunction::PostStep()
 {
     this->stepCount++;
-    const Real robotsDistance = Distance(GetFootbotPosition(mainFootbot), GetFootbotPosition(opponentFootbot));
+    const Real robotsDistance = 1 - Distance(GetFootbotPosition(mainFootbot), GetFootbotPosition(opponentFootbot)) / 4;
+    const Real robotsAngle = AngleBetweenPoints(GetFootbotPosition(mainFootbot), GetFootbotPosition(opponentFootbot));
     mainController->SetDistanceFromOpponent(robotsDistance);
     opponentController->SetDistanceFromOpponent(robotsDistance);
+    mainController->SetAngleFromOpponent(robotsAngle);
+    opponentController->SetAngleFromOpponent(robotsAngle);
 
-    CCI_FootBotProximitySensor::TReadings proximityValues = mainController->GetProximityReadings();
-    Real maxProximity = proximityValues[0].Value;
-    for (size_t i = 0; i < proximityValues.size(); ++i)
-    {
-        maxProximity = Max(maxProximity, proximityValues[i].Value);
-    }
+    Real maxProximity = mainController->GetMaxProximityValue();
 
     this->totalStepProximity += maxProximity;
     this->totalStepRightWheelSpeed += this->mainController->GetRightSpeed();
     this->totalStepLeftWheelSpeed += this->mainController->GetLeftSpeed();
 
-    if (this->stepCount % SAMPLE_STEP_VALUE == 0)
+    if (this->stepCount % SEGMENT_LENGTH == 0)
     {
-        const Real avoidCollisions = 1 - this->totalStepProximity / SAMPLE_STEP_VALUE;
-        const Real avgRightSpeed = this->totalStepRightWheelSpeed / (SAMPLE_STEP_VALUE * AdvancedController::MAX_VELOCITY);
-        const Real avgLeftSpeed = this->totalStepLeftWheelSpeed / (SAMPLE_STEP_VALUE * AdvancedController::MAX_VELOCITY);
-        const Real goFast = (abs(avgRightSpeed) + abs(avgLeftSpeed)) / 2;
-        const Real goStraight = 1 - sqrt(abs(avgRightSpeed - avgLeftSpeed) / 2);
-        totalOnSegmentPerformance += avoidCollisions * goFast;
+        const Real avoidCollisions = 1 - this->totalStepProximity / SEGMENT_LENGTH;
+        //velocity scaled to [-1, 1]
+        const Real avgRightSpeed = (this->totalStepRightWheelSpeed / SEGMENT_LENGTH) / AdvancedController::MAX_VELOCITY;
+        const Real avgLeftSpeed = (this->totalStepLeftWheelSpeed / SEGMENT_LENGTH) / AdvancedController::MAX_VELOCITY;
+        const Real goStraight = 1 / (1 + abs(avgRightSpeed - avgLeftSpeed));
+        const Real goFast = abs((avgRightSpeed + avgLeftSpeed) / 2);
+
+        totalOnSegmentPerformance += avoidCollisions * avoidCollisions * goFast * goStraight;
 
         this->totalStepProximity = 0;
         this->totalStepRightWheelSpeed = 0;
         this->totalStepLeftWheelSpeed = 0;
+        if (DEBUG)
+        {
+            size_t segmentsAnalyzed = this->stepCount / SEGMENT_LENGTH;
+            LOG << this->stepCount << std::endl;
+            const Real dist = DistanceFromSegment(GetFootbotPosition(mainFootbot), this->finishSegmentV1, this->finishSegmentV2);
+            const Real reachFinishLine = 1 / (1 + dist);
+            LOG << "dist: " << reachFinishLine << std::endl;
+            LOG << "Avg segment performance after " << segmentsAnalyzed << " segments: "
+                << totalOnSegmentPerformance / segmentsAnalyzed
+                << std::endl;
+        }
     }
 }
 
@@ -122,6 +176,9 @@ void MultiRobotLoopFunction::Reset()
     this->totalStepRightWheelSpeed = 0;
     this->totalStepLeftWheelSpeed = 0;
     this->totalOnSegmentPerformance = 0;
+
+    this->RemoveObstacles();
+    this->AddObstacles();
 
     // Move robot to the initial position
     const CVector2 mainFootbotPos = SubdivideSegment(startingSegmentV1, startingSegmentV2, 1.0 / 4);
@@ -155,13 +212,13 @@ void MultiRobotLoopFunction::ConfigureFromGenome(const GARealGenome &c_genome)
     }
     /* Set the NN parameters */
     mainController->GetPerceptron().SetOnlineParameters(mainController->GENOME_SIZE, controllerParameters);
-    if (currentGeneration == 0)
+    if (currentGeneration <= 10)
     {
         opponentController->GetPerceptron().SetOnlineParameters(opponentController->GENOME_SIZE, controllerParameters);
     }
     else
     {
-        opponentController->GetPerceptron().LoadNetworkParameters("best/best_" + ToString(currentGeneration) + ".dat");
+        opponentController->GetPerceptron().LoadNetworkParameters("best_multiple/best_" + ToString((currentGeneration / 10) * 10) + ".dat");
     }
 }
 
@@ -170,9 +227,11 @@ void MultiRobotLoopFunction::ConfigureFromGenome(const GARealGenome &c_genome)
 
 Real MultiRobotLoopFunction::Performance()
 {
-    size_t summedValuesCount = this->stepCount / SAMPLE_STEP_VALUE;
-    const Real distanceFromFinish = DistanceFromSegment(GetFootbotPosition(mainFootbot), this->finishSegmentV1, this->finishSegmentV2);
-    return totalOnSegmentPerformance / (summedValuesCount * distanceFromFinish * this->stepCount);
+    size_t segmentsAnalyzed = this->stepCount / SEGMENT_LENGTH;
+    const Real avgOnSegmentPerformance = totalOnSegmentPerformance / segmentsAnalyzed;
+    const Real dist = DistanceFromSegment(GetFootbotPosition(mainFootbot), this->finishSegmentV1, this->finishSegmentV2);
+    const Real reachFinishLine = 1 / (1 + dist);
+    return avgOnSegmentPerformance * reachFinishLine;
 }
 
 /****************************************/

@@ -18,15 +18,16 @@
                 <differential_steering implementation="default" />
                 <leds implementation="default" medium="leds" />
                 <range_and_bearing implementation="default" />
-
+                <footbot_distance_scanner implementation="default" />
             </actuators>
             <sensors>
                 <range_and_bearing implementation="medium" medium="rab" />
                 <positioning implementation="default" />
                 <footbot_proximity implementation="default" show_rays="true" />
+                <footbot_distance_scanner implementation="rot_z_only" show_rays="false" />
             </sensors>
 
-            <params num_inputs="25" num_outputs="2" />
+            <params num_inputs="26" num_outputs="2" />
         </advanced_controller>
 
     </controllers>
@@ -36,59 +37,92 @@
     <!-- * Loop functions * -->
     <!-- ****************** -->
     <loop_functions library="build/loop_function/libmulti_robot_loop_function.so" 
-    label="multi_robot_loop_function" finishSegmentV1="-2,-7" finishSegmentV2="0,-7" startingSegmentV1="-3,7.5" startingSegmentV2="-3,6.5"/>
+    label="multi_robot_loop_function" 
+    finishSegmentV1="4,-7.8" finishSegmentV2="2,-7.8"
+    startingSegmentV1="-0.2,7.5" startingSegmentV2="-1.8,7.5"
+    debug="false" />
 
     <!-- *********************** -->
     <!-- * Arena configuration * -->
     <!-- *********************** -->
     <arena size="8, 16, 1" center="0,0,0.5">
-
         <!-- Place four boxes in a square to delimit the arena -->
-        <box id="wall_north" size="8,0.1,0.5" movable="false">
-            <body position="0,8,0" orientation="0,0,0" />
+        <box id="wall_north" size="0.1,16,0.5" movable="false">
+          <body position="5,0,0" orientation="0,0,0" />
         </box>
-        <box id="wall_south" size="8,0.1,0.5" movable="false">
-            <body position="0,-8,0" orientation="0,0,0" />
+        <box id="wall_south" size="0.1,16,0.5" movable="false">
+          <body position="-5,0,0" orientation="0,0,0" />
         </box>
-        <box id="wall_east" size="0.1,16,0.5" movable="false">
-            <body position="4,0,0" orientation="0,0,0" />
+    
+        <box id="wall_east" size="10,0.1,0.5" movable="false">
+          <body position="0,-8,0" orientation="0,0,0" />
         </box>
-        <box id="wall_west" size="0.1,16,0.5" movable="false">
-            <body position="-4,0,0" orientation="0,0,0" />
+        <box id="wall_west" size="10,0.1,0.5" movable="false">
+          <body position="0,8,0" orientation="0,0,0" />
         </box>
-
-        <box id="left_wall" size="4,0.1,0.5" movable="false">
-            <body position="-2,6,0" orientation="0,0,0" />
+    
+        <!-- end arena -->
+    
+        <box id="wall1" size="0.1,2,0.5" movable="false">
+          <body position="0,7,0" orientation="0,0,0" />
         </box>
-        <box id="right_wall" size="4,0.1,0.5" movable="false">
-            <body position="-2,8,0" orientation="0,0,0" />
+    
+        <box id="wall2" size="0.1,2,0.5" movable="false">
+          <body position="-2,7,0" orientation="0,0,0" />
         </box>
-        <box id="left_wall_2" size="5.65,0.1,0.5" movable="false">
-            <body position="2,6,0" orientation="-45,0,0" />
+    
+        <box id="wall1-3" size="0.1,2.83,0.5" movable="false">
+          <body position="1,5,0" orientation="45,0,0" />
         </box>
-        <box id="right_wall_2" size="2.82,0.1,0.5" movable="false">
-            <body position="1,5,0" orientation="-45,0,0" />
+    
+        <box id="wall2-4" size="0.1,2.83,0.5" movable="false">
+          <body position="-1,5,0" orientation="45,0,0" />
         </box>
-        <box id="left_wall_3" size="4,0.1,0.5" movable="false">
-            <body position="4,2,0" orientation="-90,0,0" />
+    
+        <box id="wall3" size="0.1,2,0.5" movable="false">
+          <body position="2,3,0" orientation="0,0,0" />
         </box>
-        <box id="right_wall_3" size="4,0.1,0.5" movable="false">
-            <body position="2,2,0" orientation="-90,0,0" />
+    
+        <box id="wall4" size="0.1,2,0.5" movable="false">
+          <body position="0,3,0" orientation="0,0,0" />
         </box>
-        <box id="left_wall_4" size="5.65,0.1,0.5" movable="false">
-            <body position="2,-2,0" orientation="45,0,0" />
+    
+        <box id="wall3-5" size="0.1,5.66,0.5" movable="false">
+          <body position="0,0,0" orientation="-45,0,0" />
         </box>
-        <box id="right_wall_4" size="5.65,0.1,0.5" movable="false">
-            <body position="0,-2,0" orientation="45,0,0" />
+    
+        <box id="wall4-6" size="0.1,5.66,0.5" movable="false">
+          <body position="-2,0,0" orientation="-45,0,0" />
         </box>
-
-        <box id="left_wall_5" size="4,0.1,0.5" movable="false">
-            <body position="0,-6,0" orientation="-90,0,0" />
+    
+        <box id="wall5" size="0.1,1,0.5" movable="false">
+          <body position="-2,-2.5,0" orientation="0,0,0" />
         </box>
-        <box id="right_wall_5" size="4,0.1,0.5" movable="false">
-            <body position="-2,-6,0" orientation="-90,0,0" />
+    
+        <box id="wall6" size="0.1,2,0.5" movable="false">
+          <body position="-4,-3,0" orientation="0,0,0" />
         </box>
-    </arena>
+    
+        <box id="wall5-7" size="0.1,6.33,0.5" movable="false">
+          <body position="1,-4,0" orientation="71.57,0,0" />
+        </box>
+    
+        <box id="wall7-8" size="0.1,6.33,0.5" movable="false">
+          <body position="-1,-5,0" orientation="71.57,0,0" />
+        </box>
+    
+        <box id="wall7" size="0.1,3,0.5" movable="false">
+          <body position="4,-6.5,0" orientation="0,0,0" />
+        </box>
+    
+        <box id="wall8" size="0.1,2,0.5" movable="false">
+          <body position="2,-7,0" orientation="0,0,0" />
+        </box>
+    
+        <!-- Place a foot-bot in the origin and bind it to the controller -->
+        <!-- <foot-bot id="fb_0"> <body position="0, 0, 0" orientation="0,0,0" /> <controller config="genetic_nn"/> </foot-bot> -->
+    
+      </arena>
 
     <media>
         <range_and_bearing id="rab" />
