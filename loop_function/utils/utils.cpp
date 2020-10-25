@@ -32,3 +32,11 @@ CVector2 SubdivideSegment(const CVector2 &v1, const CVector2 &v2, Real k)
 {
     return CVector2(v1.GetX() + (v2.GetX() - v1.GetX()) * k, v1.GetY() + (v2.GetY() - v1.GetY()) * k);
 }
+
+Real AngleBetweenPoints(const CVector2 &v1, const CVector2 &v2)
+{
+    const Real deltaX = v2.GetX()-v1.GetX();
+    const Real deltaY = v2.GetY()-v1.GetY();
+    return atan2(deltaY, deltaX);
+}
+

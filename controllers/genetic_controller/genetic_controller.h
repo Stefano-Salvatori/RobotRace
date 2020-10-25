@@ -1,5 +1,5 @@
-#ifndef ADVANCED_CONTROLLER_H
-#define ADVANCED_CONTROLLER_H
+#ifndef SIMPLE_CONTROLLER_H
+#define SIMPLE_CONTROLLER_H
 
 /*
  * Include some necessary headers.
@@ -10,12 +10,11 @@
 #include <argos3/plugins/robots/generic/control_interface/ci_differential_steering_actuator.h>
 /* Definition of the foot-bot proximity sensor */
 #include <argos3/plugins/robots/foot-bot/control_interface/ci_footbot_proximity_sensor.h>
-#include <argos3/plugins/robots/generic/control_interface/ci_positioning_sensor.h>
-#include <argos3/plugins/robots/generic/control_interface/ci_range_and_bearing_actuator.h>
-#include <argos3/plugins/robots/generic/control_interface/ci_range_and_bearing_sensor.h>
-
+#include <argos3/plugins/robots/foot-bot/control_interface/ci_footbot_distance_scanner_sensor.h>
+#include <argos3/plugins/robots/foot-bot/control_interface/ci_footbot_distance_scanner_actuator.h>
 
 #include <argos3/plugins/robots/generic/control_interface/ci_leds_actuator.h>
+#include <vector>
 
 #include <controllers/nn/perceptron.h>
 
@@ -25,42 +24,43 @@
  */
 using namespace argos;
 
-/**
- * A controller that can also 'sense' the distance from other robot and use it as input of the neural network
- */
-class AdvancedController : public CCI_Controller
+class GeneticController : public CCI_Controller
 {
 private:
+   /* Pointer to the differential steering actuator */
    CCI_DifferentialSteeringActuator *wheels;
 
+   /* Pointer to the foot-bot proximity sensor */
    CCI_FootBotProximitySensor *proximity;
 
+   CCI_FootBotDistanceScannerSensor *distanceScannerSensor;
+   CCI_FootBotDistanceScannerActuator *distanceScannerActuator;
+
+   /* Pointer to the foot-bot proximity sensor */
    CCI_LEDsActuator *leds;
 
-   CCI_PositioningSensor *positioning;
-
-   CCI_RangeAndBearingActuator *rabActuator;
-
-   CCI_RangeAndBearingSensor *rabSensor;
+   /*
+    * The following variables are used as parameters for the
+    * algorithm. You can set their value in the <parameters> section
+    * of the XML configuration file, under the
+    * <controllers><footbot_diffusion_controller> section.
+    */
 
    /* Wheel speeds */
    Real leftSpeed, rightSpeed = 0.0;
 
-   Real distanceFromOpponent = -1;
-
+   /* The perceptron neural network */
    CPerceptron perceptron;
-
-   bool useInternalSensor = false;
 
 public:
    static const Real MAX_VELOCITY;
    static const int GENOME_SIZE;
 
    /* Class constructor. */
-   AdvancedController();
+   GeneticController();
 
    /* Class destructor. */
-   virtual ~AdvancedController();
+   virtual ~GeneticController();
 
    /*
     * This function initializes the controller.
@@ -86,6 +86,11 @@ public:
     */
    virtual void Destroy();
 
+   /**
+    * Get the max proximity value read from the sensor
+    */
+   const Real GetMaxProximityValue();
+
    inline CPerceptron &GetPerceptron()
    {
       return perceptron;
@@ -98,16 +103,12 @@ public:
 
    inline const Real GetLeftSpeed()
    {
-      return leftSpeed;
+      return this->leftSpeed;
    }
 
    inline const Real GetRightSpeed()
    {
-      return rightSpeed;
-   }
-
-   inline void SetDistanceFromOpponent(Real dist) {
-      distanceFromOpponent = dist;
+      return this->rightSpeed;
    }
 };
 

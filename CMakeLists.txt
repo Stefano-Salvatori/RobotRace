@@ -34,31 +34,16 @@ add_subdirectory(controllers)
 add_subdirectory(loop_function)
 
 add_executable(SingleRobotExperiment single_bot_experiment.cpp)
-add_executable(MultipleRobotExperiment multiple_bot_experiment.cpp)
-
 
 target_link_libraries(SingleRobotExperiment
   ${GALIB_LIBRARIES}
-  simple_controller
+  genetic_controller
   single_robot_loop_function
   argos3core_simulator)
 
-target_link_libraries(MultipleRobotExperiment
-  ${GALIB_LIBRARIES}
-  advanced_controller
-  multi_robot_loop_function
-  argos3core_simulator)
 
 target_include_directories(SingleRobotExperiment PUBLIC
                           "${PROJECT_BINARY_DIR}"
                           "${PROJECT_SOURCE_DIR}/controllers"
                           "${PROJECT_SOURCE_DIR}/loop_function"
                           )
-
-                          
-target_include_directories(MultipleRobotExperiment PUBLIC
-                          "${PROJECT_BINARY_DIR}"
-                          "${PROJECT_SOURCE_DIR}/controllers"
-                          "${PROJECT_SOURCE_DIR}/loop_function"
-                          )
-

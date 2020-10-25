@@ -1,5 +1,6 @@
 /* GA-related headers */
 #include <ga/ga.h>
+#include <math.h>
 
 /* ARGoS-related headers */
 #include <argos3/core/simulator/simulator.h>
@@ -28,14 +29,17 @@ float LaunchARGoS(GAGenome &c_genome)
     * it is faster. */
     static argos::CSimulator &cSimulator = argos::CSimulator::GetInstance();
     /* Get a reference to the loop functions */
-    static SingleRobotLoopFunction &cLoopFunctions = 
+    static SingleRobotLoopFunction &cLoopFunctions =
         dynamic_cast<SingleRobotLoopFunction &>(cSimulator.GetLoopFunctions());
     /*
     * Run multiple trials and take the worst performance as final value.
     */
-    Real worstPerformance = 1000000;
+    Real worstPerformance = 1000;
+    // Real tot = 0;
+
     for (size_t i = 0; i < NUM_TRIALS; ++i)
     {
+        cSimulator.SetRandomSeed(random());
         /* Reset the experiment.*/
         cSimulator.Reset();
         /* Configure the controller with the genome */
@@ -44,28 +48,35 @@ float LaunchARGoS(GAGenome &c_genome)
         cSimulator.Execute();
         /* Update performance */
         worstPerformance = Min(worstPerformance, cLoopFunctions.Performance());
-        
+        // tot +=cLoopFunctions.Performance();
     }
     /* Return the result of the evaluation */
+    // return tot / NUM_TRIALS;
     return worstPerformance;
+}
+
+int WriteGenome(std::ofstream outputStream,
+                const GARealGenome &c_genome)
+{
 }
 
 /*
  * Flush best individual
  */
 int FlushBest(const GARealGenome &c_genome,
-              size_t un_generation)
+              size_t un_generation,
+              char *folderName)
 {
     std::ostringstream cOSS;
-    cOSS << "best_single/"
+    cOSS << folderName << "/"
          << "best_" << un_generation << ".dat";
     std::ofstream cOFS(cOSS.str().c_str(), std::ios::out | std::ios::trunc);
     if (cOFS.is_open())
     {
-        cOFS << SimpleController::GENOME_SIZE // first write the number of values to dump
+        cOFS << GeneticController::GENOME_SIZE // first write the number of values to dump
              << " "
              << c_genome // then write the actual values
-             << std::endl;
+             << "\n";
         cOFS.close();
         return 0;
     }
@@ -80,24 +91,37 @@ int FlushBest(const GARealGenome &c_genome,
 
 int main(int argc, char **argv)
 {
+    if (argc < 2)
+    {
+        std::cerr << "Pass the folder name where the algorithm intermediate files will be stored." << std::endl;
+        return 1;
+    }
+    char *folder = argv[1];
     /*
     * Initialize GALIB
     */
-    /* Create an allele whose values can be in the range [-20,20] */
-    GAAlleleSet<float> cAlleleSet(-20.0f, 20.0f);
+    GAAlleleSet<float> cAlleleSet(-15.0f, 15.0f);
     /* Create a genome using LaunchARGoS() to evaluate it */
-    GARealGenome cGenome(SimpleController::GENOME_SIZE, cAlleleSet, LaunchARGoS);
-    /* Create and configure a basic genetic algorithm using the genome */
-    GASimpleGA cGA(cGenome);
+    GARealGenome cGenome(GeneticController::GENOME_SIZE, cAlleleSet, LaunchARGoS);
 
-    cGA.maximize();         // the objective function must be maximized
-    cGA.populationSize(30); // population size for each generation
-    cGA.nGenerations(150);  // number of generations
-    cGA.pMutation(0.15f);   // prob of gene mutation
+    GASteadyStateGA cGA(cGenome);
+    cGA.maximize(); // the objective function must be maximized
     cGA.crossover(GARealTwoPointCrossover);
-    cGA.pCrossover(0.25f);              // prob of gene crossover
-    cGA.scoreFilename("evolution.dat"); // filename for the result log
-    cGA.flushFrequency(1);              // log the results every generation
+
+    // load parameters
+    std::ifstream parametersFile("genetic_parameters.conf");
+    cGA.parameters(parametersFile, GABoolean::gaTrue);
+    LOG << "Algorithm parameters: \n"
+        << cGA.parameters() << std::endl;
+
+    //write algorith marameters in the a conf file inside the algorithm sfolder
+    std::ostringstream cOSS;
+    cOSS << folder << "/"
+         << "parameters.conf";
+    std::ofstream cOFS(cOSS.str().c_str(), std::ios::out | std::ios::trunc);
+    cOFS << cGA.parameters()
+         << "\n";
+    cOFS.close();
 
     /*
     * Initialize ARGoS
@@ -115,7 +139,7 @@ int main(int argc, char **argv)
     /*
     * Launch the evolution, setting the random seed
     */
-    cGA.initialize(12345);
+    cGA.initialize(132);
     do
     {
         argos::LOG << "Generation #" << cGA.generation() << "...";
@@ -130,11 +154,14 @@ int main(int argc, char **argv)
 
             /* Flush best individual */
             argos::LOG << "   Flushing best individual: "
-                       << cGA.statistics().bestIndividual().score()                    
+                       << cGA.population().max()
                        << " population avg: "
                        << cGA.population().ave()
                        << "...";
-            if (FlushBest(dynamic_cast<const GARealGenome &>(cGA.statistics().bestIndividual()), cGA.generation()) == 0)
+            if (FlushBest(
+                    dynamic_cast<const GARealGenome &>(cGA.statistics().bestIndividual()),
+                    cGA.generation(),
+                    folder) == 0)
             {
                 argos::LOG << " done.";
             }
