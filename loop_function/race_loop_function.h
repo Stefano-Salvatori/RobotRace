@@ -33,6 +33,7 @@ using namespace argos;
 class RaceLoopFunction : public CLoopFunctions
 {
 private:
+   size_t stepCount = 0;
    int numBots = DEFAULT_NUM_BOTS;
    //Finish line of the race (as a pair of point that defines the vertices of a segment)
    CVector2 finishSegmentV1;

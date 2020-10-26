@@ -40,3 +40,14 @@ Real AngleBetweenPoints(const CVector2 &v1, const CVector2 &v2)
     return atan2(deltaY, deltaX);
 }
 
+Real Map(Real x, Real in_min, Real in_max, Real out_min, Real out_max)
+{
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+} 
+
+    int Sign(CRadians r)
+{
+    if(r.GetValue() > 0) return 1;
+    else if(r.GetValue() < 0) return -1;
+    else return 0;
+}

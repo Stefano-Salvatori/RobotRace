@@ -76,7 +76,7 @@ void SingleRobotLoopFunction::Init(TConfigurationNode &t_node)
        "genetic_nn" // controller id as set in the XML
    );
    AddEntity(*footBot);
-   controller = &dynamic_cast<GeneticController &>(footBot->GetControllableEntity().GetController());
+   controller = &dynamic_cast<MotorSchemaController &>(footBot->GetControllableEntity().GetController());
 
    /* Add Random obstacles in the map */
    AddObstacles();
@@ -186,12 +186,12 @@ void SingleRobotLoopFunction::Reset()
 void SingleRobotLoopFunction::ConfigureFromGenome(const GARealGenome &c_genome)
 {
    /* Copy the genes into the NN parameter buffer */
-   for (size_t i = 0; i < controller->GENOME_SIZE; ++i)
+   /*for (size_t i = 0; i < controller->GENOME_SIZE; ++i)
    {
       parameters[i] = c_genome[i];
-   }
+   }*/
    /* Set the NN parameters */
-   controller->GetPerceptron().SetOnlineParameters(controller->GENOME_SIZE, parameters);
+   // controller->GetPerceptron().SetOnlineParameters(controller->GENOME_SIZE, parameters);
 }
 
 /****************************************/

@@ -14,7 +14,8 @@ const CVector3 OBSTACLE_POSITIONS[NUM_OBSTACLES] = {
     CVector3(1, -5, 0),
 };
 
-RaceLoopFunction::RaceLoopFunction() : m_pcRNG(NULL)
+RaceLoopFunction::RaceLoopFunction() : m_pcRNG(NULL),
+                                       stepCount(0)
 {
 }
 
@@ -47,9 +48,6 @@ void RaceLoopFunction ::AddObstacles()
         AddEntity(*obstacles[i]);
     }
 }
-
-/****************************************/
-/****************************************/
 
 void RaceLoopFunction::Init(TConfigurationNode &t_node)
 {
@@ -120,6 +118,7 @@ void RaceLoopFunction::PreStep()
 
 void RaceLoopFunction::PostStep()
 {
+    stepCount++;
 }
 
 bool RaceLoopFunction ::IsExperimentFinished()
@@ -129,9 +128,7 @@ bool RaceLoopFunction ::IsExperimentFinished()
         const CVector2 pos = GetFootBotPosition(i);
         const CRange<Real> rangeX = RangeX(finishSegmentV1, finishSegmentV2);
         const CRange<Real> rangeY = RangeY(finishSegmentV1, finishSegmentV2);
-        LOG << "x " << pos.GetX() << "  y" << pos.GetY() << std::endl;
-
-        if (pos.GetX() < rangeX.GetMax() && pos.GetX() > rangeX.GetMin() &&  pos.GetY() < rangeY.GetMin())
+        if (pos.GetX() < rangeX.GetMax() && pos.GetX() > rangeX.GetMin() && pos.GetY() < rangeY.GetMin())
             return true;
     }
     return false;
@@ -139,6 +136,7 @@ bool RaceLoopFunction ::IsExperimentFinished()
 
 void RaceLoopFunction ::Reset()
 {
+    stepCount = 0;
     RemoveObstacles();
     AddObstacles();
     for (size_t i = 0; i < bots.size(); i++)
@@ -158,9 +156,6 @@ void RaceLoopFunction ::Reset()
     }
 }
 
-/****************************************/
-/****************************************/
-
 std::string RaceLoopFunction::Winner()
 {
     for (size_t i = 0; i < bots.size(); i++)
@@ -172,8 +167,5 @@ std::string RaceLoopFunction::Winner()
     }
     return "tie";
 }
-
-/****************************************/
-/****************************************/
 
 REGISTER_LOOP_FUNCTIONS(RaceLoopFunction, "race_loop_function");
