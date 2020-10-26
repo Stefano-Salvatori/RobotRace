@@ -3,7 +3,7 @@
 
 /* Utility */
 #include <utility>
-#include <utils/utils.h>
+#include "utils/utils.h"
 
 /* The NN controller */
 #include <controllers/genetic_controller/genetic_controller.h>
@@ -43,7 +43,6 @@ private:
    CVector2 startingSegmentV2;
 
    std::vector<CFootBotEntity> bots;
-   std::vector<CCI_Controller> controllers;
 
    CRandom::CRNG *m_pcRNG;
 
@@ -72,8 +71,10 @@ public:
    virtual void Reset();
    virtual bool IsExperimentFinished();
 
-   /* Calculates the performance of the robot in a trial */
-   Real Performance();
+   /**
+    * Return the index of the winning robot
+    */
+   std::string Winner();
 };
 
 #endif

@@ -1,0 +1,35 @@
+\documentclass[]{report}
+\usepackage{graphicx}
+\graphicspath{ {./res/} }
+
+
+% Title Page
+\title{RobotRace}
+\author{Stefano Salvatori, Riccardo Salvatori}
+
+
+\begin{document}
+\maketitle
+
+\section{Introduzione}
+
+
+\section{Controller Genetico}
+Per il controller genetico abbiamo deciso, ispirandoci al lavoro di \textit{Floreano e Mandola} \cite{genetic_evolution_nn},  di utilizzare una rete neurale addestrata attraverso un algoritmo genetico. In particolare in questo caso il robot viene controllato tramite una rete composta da 24 neuroni di input completamente connessi a due neuroni di output come mostrato in figura \ref{fig:genetic_network}.
+Gli input vengono letti da 12 sensori di distanza accoppiati ognuno con il suo angolo (ricordiamo che l'angolo varia visto che il sensore di distanza ruota ad una certa velocità sul footbot); gli output rappresentano invece la velocità da assegnare alle ruote. Sia i valori degli input relativi alle distanze che i valori di output sono stati normalizzati nell'intervallo [0,1]; gli angoli sono invece stati inseriti in radianti con valori in [-$\pi$, $\pi$]
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{genetic_network.png}
+\caption{Schema della rete neurale che controlla il robot. I 2 neuroni di ouput rappresentano la velocità delle ruote mentre gli input vengono letti da  12 sensori di distanza: ogni valore del sensore viene passato con il suo angolo. }
+\label{fig:genetic_network}
+\end{figure}
+
+
+Il genoma di ogni controller è rappresentato da un array di 50 numeri reali ((24 input + 1 bias) * 2  output = 50) corrispondenti ai pesi della rete.
+Sono stati utilizzati solo 12 dei 24 sensori presenti nel footbot per ridurre lo spazio di ricerca dell'algoritmo genetico: utilizzarli tutti avrebbe infatti richiesto una rete composta da 98 pesi ((48+1)*2) riducendo le performance dell'algoritmo sia in termini di tempi di esecuzione che tempi di convergenza.
+
+
+\bibliographystyle{unsrt}
+\bibliography{bibliografia}
+
+\end{document}          

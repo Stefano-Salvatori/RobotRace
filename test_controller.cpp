@@ -59,12 +59,11 @@ int main(int argc, char **argv)
     /* The CSimulator class of ARGoS is a singleton. Therefore, to
     * manipulate an ARGoS experiment, it is enough to get its instance */
     argos::CSimulator &cSimulator = argos::CSimulator::GetInstance();
-    /* Set the .argos configuration file
-    * This is a relative path which assumed that you launch the executable
-    * from argos3-examples (as said also in the README) */
+    /* Set the .argos configuration file */
     cSimulator.SetExperimentFileName("test.argos");
     /* Load it to configure ARGoS */
     cSimulator.LoadExperiment();
+
     double results[numTrials];
     LaunchARGoS(numTrials, results);
     std::ostringstream cOSS;

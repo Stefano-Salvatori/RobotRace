@@ -35,6 +35,8 @@ add_subdirectory(loop_function)
 
 add_executable(SingleRobotExperiment single_bot_experiment.cpp)
 add_executable(TestController test_controller.cpp)
+add_executable(Race race.cpp)
+
 
 target_link_libraries(TestController
   ${GALIB_LIBRARIES}
@@ -47,6 +49,13 @@ target_link_libraries(SingleRobotExperiment
   ${GALIB_LIBRARIES}
   genetic_controller
   single_robot_loop_function
+  argos3core_simulator)
+
+
+target_link_libraries(Race
+  ${GALIB_LIBRARIES}
+  genetic_controller
+  race_loop_function
   argos3core_simulator)
 
 

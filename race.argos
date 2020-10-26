@@ -6,14 +6,14 @@
     <!-- ************************* -->
     <framework>
         <system threads="0" />
-        <experiment length="500" ticks_per_second="10" />
+        <experiment length="600" ticks_per_second="10" />
     </framework>
 
     <!-- *************** -->
     <!-- * Controllers * -->
     <!-- *************** -->
     <controllers>
-        <genetic_controller id="genetic_nn" library="build/controllers/libgenetic_controller.so">
+        <genetic_controller id="one_point" library="build/controllers/libgenetic_controller.so">
             <actuators>
                 <differential_steering implementation="default" />
                 <leds implementation="default" medium="leds" />
@@ -23,7 +23,33 @@
                 <footbot_proximity implementation="default" show_rays="false" />
                 <footbot_distance_scanner implementation="rot_z_only" show_rays="false" />
             </sensors>
-            <params num_inputs="24" num_outputs="2" parameter_file="genetic_1/best_200.dat" />
+            <params num_inputs="24" num_outputs="2" parameter_file="genetic_6/best_200.dat" />
+        </genetic_controller>
+
+        <genetic_controller id="two_point" library="build/controllers/libgenetic_controller.so">
+            <actuators>
+                <differential_steering implementation="default" />
+                <leds implementation="default" medium="leds" />
+                <footbot_distance_scanner implementation="default" />
+            </actuators>
+            <sensors>
+                <footbot_proximity implementation="default" show_rays="false" />
+                <footbot_distance_scanner implementation="rot_z_only" show_rays="false" />
+            </sensors>
+            <params num_inputs="24" num_outputs="2" parameter_file="genetic_5/best_200.dat" />
+        </genetic_controller>
+
+        <genetic_controller id="uniform" library="build/controllers/libgenetic_controller.so">
+            <actuators>
+                <differential_steering implementation="default" />
+                <leds implementation="default" medium="leds" />
+                <footbot_distance_scanner implementation="default" />
+            </actuators>
+            <sensors>
+                <footbot_proximity implementation="default" show_rays="false" />
+                <footbot_distance_scanner implementation="rot_z_only" show_rays="false" />
+            </sensors>
+            <params num_inputs="24" num_outputs="2" parameter_file="genetic_7/best_200.dat" />
         </genetic_controller>
 
 
@@ -37,8 +63,8 @@
         label="race_loop_function"
         finishSegmentV1="4,-7" finishSegmentV2="2,-7"
         startingSegmentV1="-0.2,7.5" startingSegmentV2="-1.8,7.5"
-        controllers="genetic_nn"
-        numBots="1"
+        controllers="one_point, two_point, uniform"
+        numBots="3"
         debug="true" />
 
     <!-- *********************** -->
@@ -130,16 +156,6 @@
     <media />
 
 
-    <visualization>
-        <qt-opengl>
-            <camera>
-                <placement idx="0" position="2,2,2" look_at="1,1,1" />
-                <placement idx="1" position="0,0,10" look_at="0,0,0" />
-                <placement idx="2" position="3,3,4" look_at="1,6,0" />
-                <placement idx="3" position="2,3,2" look_at="0,1,0" />
-            </camera>
-        </qt-opengl>
-
-    </visualization>
+    <!-- <visualization> <qt-opengl> <camera> <placement idx="0" position="2,2,2" look_at="1,1,1" /> <placement idx="1" position="0,0,10" look_at="0,0,0" /> <placement idx="2" position="3,3,4" look_at="1,6,0" /> <placement idx="3" position="2,3,2" look_at="0,1,0" /> </camera> </qt-opengl> </visualization> -->
 
 </argos-configuration>

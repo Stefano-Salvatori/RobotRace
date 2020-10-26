@@ -54,10 +54,6 @@ float LaunchARGoS(GAGenome &c_genome)
     return worstPerformance;
 }
 
-int WriteGenome(std::ofstream outputStream,
-                const GARealGenome &c_genome)
-{
-}
 
 /*
  * Flush best individual
@@ -103,7 +99,7 @@ int main(int argc, char **argv)
     /* Create a genome using LaunchARGoS() to evaluate it */
     GARealGenome cGenome(GeneticController::GENOME_SIZE, cAlleleSet, LaunchARGoS);
 
-    GASteadyStateGA cGA(cGenome);
+    GASimpleGA cGA(cGenome);
     cGA.maximize(); // the objective function must be maximized
     cGA.crossover(GARealUniformCrossover);
 
@@ -128,9 +124,7 @@ int main(int argc, char **argv)
     /* The CSimulator class of ARGoS is a singleton. Therefore, to
     * manipulate an ARGoS experiment, it is enough to get its instance */
     argos::CSimulator &cSimulator = argos::CSimulator::GetInstance();
-    /* Set the .argos configuration file
-    * This is a relative path which assumed that you launch the executable
-    * from argos3-examples (as said also in the README) */
+    /* Set the .argos configuration file */
     cSimulator.SetExperimentFileName("train.argos");
     /* Load it to configure ARGoS */
     cSimulator.LoadExperiment();
