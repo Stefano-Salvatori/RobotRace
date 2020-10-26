@@ -126,10 +126,13 @@ bool RaceLoopFunction ::IsExperimentFinished()
 {
     for (size_t i = 0; i < bots.size(); i++)
     {
-        if (DistanceFromSegment(GetFootBotPosition(i), finishSegmentV1, finishSegmentV2) < MIN_DISTANCE_FROM_FINISH)
-        {
+        const CVector2 pos = GetFootBotPosition(i);
+        const CRange<Real> rangeX = RangeX(finishSegmentV1, finishSegmentV2);
+        const CRange<Real> rangeY = RangeY(finishSegmentV1, finishSegmentV2);
+        LOG << "x " << pos.GetX() << "  y" << pos.GetY() << std::endl;
+
+        if (pos.GetX() < rangeX.GetMax() && pos.GetX() > rangeX.GetMin() &&  pos.GetY() < rangeY.GetMin())
             return true;
-        }
     }
     return false;
 }

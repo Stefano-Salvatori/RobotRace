@@ -8,6 +8,10 @@ function vector.vec2_sum(v1, v2)
 	return v3	
 end
 
+function vector.zero()
+	return {length = 0.0 , angle = 0.0}
+end
+
 
 -- From polar to cartesian coordinates
 function vector.polar_to_cart(v)
