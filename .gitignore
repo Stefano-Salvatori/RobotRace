@@ -2,6 +2,7 @@ build/*
 best/*
 best_single*/*
 genetic*/*
+results.txt
 
 .vscode/*
 *.dat
