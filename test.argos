@@ -13,7 +13,7 @@
   <!-- * Controllers * -->
   <!-- *************** -->
   <controllers>
-    <genetic_controller id="genetic_nn" library="build/controllers/libgenetic_controller.so">
+    <genetic_controller id="genetic_nn_1" library="build/controllers/libgenetic_controller.so">
       <actuators>
         <differential_steering implementation="default" />
         <leds implementation="default" medium="leds" />
@@ -23,9 +23,28 @@
         <footbot_proximity implementation="default" show_rays="false" />
         <footbot_distance_scanner implementation="rot_z_only" show_rays="true" />
       </sensors>
-      <params num_inputs="24" num_outputs="2" parameter_file="genetic_6/best_200.dat" />
+      <params num_inputs="24" num_outputs="2" parameter_file="steady_state/one_point/best_200.dat" />
     </genetic_controller>
+
+      <motor_schema_controller id="genetic_nn" library="build/controllers/libmotor_schema_controller.so">
+        <actuators>
+        <footbot_distance_scanner implementation="default" />
+        <differential_steering implementation="default" />
+        <leds implementation="default" medium="leds" />
+        </actuators>
+
+        <sensors>
+            <footbot_distance_scanner implementation="rot_z_only"/>
+            <differential_steering implementation="default" />
+            <footbot_proximity implementation="default" show_rays="true" />
+            <footbot_light implementation="rot_z_only" show_rays="false" noise_level="0.0" />
+            <positioning implementation="default" />
+        </sensors>
+        <params/>
+    </motor_schema_controller>
   </controllers>
+
+
 
 
   <!-- ****************** -->
@@ -125,7 +144,7 @@
   <media />
 
 
-  <!--<visualization>
+  <visualization>
     <qt-opengl>
       <camera>
         <placement idx="0" position="2,2,2" look_at="1,1,1" />
@@ -135,6 +154,6 @@
       </camera>
     </qt-opengl>
 
-  </visualization>-->
+  </visualization>
 
 </argos-configuration>

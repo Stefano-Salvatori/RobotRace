@@ -7,7 +7,17 @@ add_library(genetic_controller SHARED
   genetic_controller/genetic_controller.cpp
 )
 
+add_library(motor_schema_controller SHARED
+  motor_schema_controller/motor_schema.h
+  motor_schema_controller/motor_schema.cpp
+)
+
 target_link_libraries(genetic_controller
+  argos3core_simulator
+  argos3plugin_simulator_footbot
+  argos3plugin_simulator_genericrobot)
+
+  target_link_libraries(motor_schema_controller
   argos3core_simulator
   argos3plugin_simulator_footbot
   argos3plugin_simulator_genericrobot)

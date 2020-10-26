@@ -16,6 +16,7 @@ add_library(race_loop_function SHARED
 
 target_link_libraries(single_robot_loop_function
   genetic_controller
+  motor_schema_controller
   argos3core_simulator
   argos3plugin_simulator_dynamics2d
   argos3plugin_simulator_entities
@@ -26,6 +27,7 @@ target_link_libraries(single_robot_loop_function
 
 target_link_libraries(race_loop_function
   genetic_controller
+  motor_schema_controller
   argos3core_simulator
   argos3plugin_simulator_dynamics2d
   argos3plugin_simulator_entities
