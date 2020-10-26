@@ -8,7 +8,6 @@ doc/res/*
 doc/*.gz
 
 .vscode/*
-*.dat
 
 # Prerequisites
 *.d
