@@ -13,7 +13,7 @@
     <!-- * Controllers * -->
     <!-- *************** -->
     <controllers>
-        <genetic_controller id="genetic_nn" library="build/controllers/libgenetic_controller.so">
+        <!--<genetic_controller id="genetic_nn" library="build/controllers/libgenetic_controller.so">
             <actuators>
                 <differential_steering implementation="default" />
                 <leds implementation="default" medium="leds" />
@@ -24,7 +24,26 @@
                 <footbot_distance_scanner implementation="rot_z_only" show_rays="false" />
             </sensors>
             <params num_inputs="24" num_outputs="2" parameter_file="genetic_1/best_200.dat" />
-        </genetic_controller>
+        </genetic_controller>-->
+
+    <lua_controller id="genetic_nn">
+        <actuators>
+        <footbot_distance_scanner implementation="default" />
+        <differential_steering implementation="default" />
+        <leds implementation="default" medium="leds" />
+        </actuators>
+
+        <sensors>
+            <footbot_distance_scanner implementation="rot_z_only"/>
+            <differential_steering implementation="default" />
+            <footbot_proximity implementation="default" show_rays="true" />
+            <footbot_light implementation="rot_z_only" show_rays="false" noise_level="0.0" />
+            <positioning implementation="default" />
+        </sensors>
+
+        <params script="controllers/motor_schema_controller/motor_schema.lua"/>
+    </lua_controller>
+
 
 
     </controllers>
@@ -37,7 +56,7 @@
         label="race_loop_function"
         finishSegmentV1="4,-7" finishSegmentV2="2,-7"
         startingSegmentV1="-0.2,7.5" startingSegmentV2="-1.8,7.5"
-        numBots="2"
+        numBots="1"
         debug="true" />
 
     <!-- *********************** -->

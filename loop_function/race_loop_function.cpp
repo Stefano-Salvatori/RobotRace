@@ -69,7 +69,8 @@ void RaceLoopFunction ::Init(TConfigurationNode &t_node)
         );
         bots.push_back(*bot);
         AddEntity(*bot);
-        controllers.push_back(dynamic_cast<GeneticController &>(bot->GetControllableEntity().GetController()));
+        controllers.push_back(bot->GetControllableEntity().GetController());
+
     }
 
     /* Add Random obstacles in the map */
@@ -103,23 +104,24 @@ void RaceLoopFunction ::Init(TConfigurationNode &t_node)
 
 void RaceLoopFunction ::PreStep()
 {
-    LOG << "Ciao PreStep" << std::endl;
+    
 }
 
 void RaceLoopFunction ::PostStep()
 {
-    LOG << "Ciao PostStep" << std::endl;
 }
 
 bool RaceLoopFunction ::IsExperimentFinished()
 {
     for (size_t i = 0; i < bots.size(); i++)
     {
-        LOG << "Ciao \n";
-        if (DistanceFromSegment(GetFootBotPosition(i), this->finishSegmentV1, this->finishSegmentV2) < MIN_DISTANCE_FROM_FINISH)
-        {
+        const CVector2 pos = GetFootBotPosition(i);
+        const CRange<Real> rangeX = RangeX(finishSegmentV1, finishSegmentV2);
+        const CRange<Real> rangeY = RangeY(finishSegmentV1, finishSegmentV2);
+        LOG << "x " << pos.GetX() << "  y" << pos.GetY() << std::endl;
+
+        if (pos.GetX() < rangeX.GetMax() && pos.GetX() > rangeX.GetMin() &&  pos.GetY() < rangeY.GetMin())
             return true;
-        }
     }
     return false;
 }
@@ -133,7 +135,7 @@ void RaceLoopFunction ::Reset()
         // Move robot to the initial position
         const CVector2 pos = SubdivideSegment(startingSegmentV1, startingSegmentV2, (i * 2 + 1) / (bots.size() * 2.0));
         CQuaternion orientation;
-        orientation = orientation.FromEulerAngles(CRadians::ZERO, CRadians::ZERO, CRadians::ZERO);
+        orientation = orientation.FromEulerAngles(-CRadians::PI_OVER_TWO, CRadians::ZERO, CRadians::ZERO);
         if (!MoveEntity(
                 bots[i].GetEmbodiedEntity(),         // move the body of the robot
                 CVector3(pos.GetX(), pos.GetY(), 0), // to this position
