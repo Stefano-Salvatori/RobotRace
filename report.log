@@ -1,0 +1,22 @@
+This is TeX, Version 3.14159265 (TeX Live 2017/Debian) (preloaded format=tex 2020.10.27)  27 OCT 2020 11:39
+**./doc/report.tex
+(./doc/report.tex
+! Undefined control sequence.
+l.1 \documentclass
+                  []{report}
+? 
+! Undefined control sequence.
+l.2 \usepackage
+               {graphicx}
+? 
+! Undefined control sequence.
+l.3 \graphicspath
+                 { {./res/} }
+? 
+! Undefined control sequence.
+l.7 \title
+          {RobotRace}
+? 
+! Undefined control sequence.
+l.8 \author
+           {Stefano Sa
