@@ -137,12 +137,12 @@
       <body position="2,-7,0" orientation="0,0,0" />
     </box>
 
-  <!-- Obstacoles 
+  <!-- Obstacoles -->
 
     <box id="o"  size="0.2, 0.2, 0.2" movable="false">
       <body position="0,5,0" orientation="0,0,0" />
     </box>
--->
+
    
 
     <!-- Place a foot-bot and bind it to the controller -->

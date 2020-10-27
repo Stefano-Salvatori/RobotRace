@@ -13,6 +13,56 @@
 
 \section{Introduzione}
 
+\section{Motor Schema}
+ Per l'implementazione attraverso motor schema si è deciso di implementare 3 comportamenti principali: "go foreword", "stay on path" e "avoid obstacoles", associando ad ognuno il relativo campo di forze.
+ Ogni campo genera un vettore di lunghezza compresa tra 0 e 1; i valori vengono poi combinati per generare il vettore risultante che determinerà la  velocità traslazionale ed angolare del robot.
+ Per determinare i valori di rotazione delle ruote (destra e sinistra), è necessario passare dal modello traslazionale a quello differenziale, attraverso le formule:
+ 
+ \subsection{Go Foreword}
+ 
+ Per implementare questo comportamento viene specificato un campo "uniforme" direzionato veso la meta, permettendo al robot di muoversi verso di essa.
+ L'intensità dal campo è costante, la direzione assoluta è costane ma, essendo calcolata sul riferimento del robot, dipende dall'orientamento relativo del footbot.
+
+$$
+V_{angle} = 0
+$$
+$$
+V_{length} = C
+$$
+
+ 
+ 
+ \subsection{Stay On Path} 
+ Definisce un campo di forza "perpendicolare" ai muri del tracciato. Permette al robot di rimanere all'interno del percorso.
+ Viene utilizzato il \textit{distance scanner} per misurare la distanza dai muri così da determinare l'intensità del campo.
+ Il sensore di distanza genere 24 coppiedistanze-angolo, 12 long range e 12 short range. I valori di distanza vengono scalati in un valore tra 0 e 1 e combinati in un singolo vettore. La lunghezza del vettore viene scalata anch'essa tra 0 e 1.
+ 
+ $$
+ V_{angle} = -\frac{\pi}{2}
+ $$
+ $$
+ V_{length} = \left\{\begin{array}{lr}
+ \frac{D-d}{D} & \text{for } d \leq D\\
+ 1 & \text{for } d $>$ D
+ \end{array}\right\}
+ $$
+ 
+ 
+ \subsection{Avoid Obstacoles} 
+ Definisce un campo "tangenziale" in presenza di ostacoli, permettendo al robot di aggirarli.
+ Per misurare l'intensità e la direzione del campo viene utilizzato il \textit{proximity sensor}.
+ Il sensore di distanza genere 24 coppie prossimità-angolo. Da queste viene generato un singolo vettore con lunghezza compresa tra 0 e 1.
+ 
+  $$
+ V_{angle} = \frac{\pi}{2} + \alpha
+ $$
+ $$
+ V_{length} = p
+ $$
+ 
+ 
+ 
+ 
 
 \section{Controller Genetico}
 Per il controller genetico abbiamo deciso, ispirandoci al lavoro di \textit{Floreano e Mandola} \cite{genetic_evolution_nn},  di utilizzare una rete neurale addestrata con un algoritmo genetico. In particolare in questo caso il robot viene controllato da una rete composta da 24 neuroni di input completamente connessi a due neuroni di output come mostrato in figura \ref{fig:genetic_network}.
