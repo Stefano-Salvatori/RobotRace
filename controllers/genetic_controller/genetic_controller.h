@@ -1,5 +1,5 @@
-#ifndef SIMPLE_CONTROLLER_H
-#define SIMPLE_CONTROLLER_H
+#ifndef GENETIC_CONTROLLER_H
+#define GENETIC_CONTROLLER_H
 
 /*
  * Include some necessary headers.
@@ -16,6 +16,8 @@
 #include <argos3/plugins/robots/generic/control_interface/ci_leds_actuator.h>
 #include <vector>
 
+#include <controllers/common_controller.h>
+
 #include <controllers/nn/perceptron.h>
 
 /*
@@ -24,36 +26,15 @@
  */
 using namespace argos;
 
-class GeneticController : public CCI_Controller
+class GeneticController : public CommonController
 {
 private:
-   /* Pointer to the differential steering actuator */
-   CCI_DifferentialSteeringActuator *wheels;
-
-   /* Pointer to the foot-bot proximity sensor */
-   CCI_FootBotProximitySensor *proximity;
-
-   CCI_FootBotDistanceScannerSensor *distanceScannerSensor;
-   CCI_FootBotDistanceScannerActuator *distanceScannerActuator;
-
-   /* Pointer to the foot-bot proximity sensor */
-   CCI_LEDsActuator *leds;
-
-   /*
-    * The following variables are used as parameters for the
-    * algorithm. You can set their value in the <parameters> section
-    * of the XML configuration file, under the
-    * <controllers><footbot_diffusion_controller> section.
-    */
-
-   /* Wheel speeds */
-   Real leftSpeed, rightSpeed = 0.0;
+   
 
    /* The perceptron neural network */
    CPerceptron perceptron;
 
 public:
-   static const Real MAX_VELOCITY;
    static const int GENOME_SIZE;
 
    /* Class constructor. */
@@ -86,29 +67,9 @@ public:
     */
    virtual void Destroy();
 
-   /**
-    * Get the max proximity value read from the sensor
-    */
-   const Real GetMaxProximityValue();
-
    inline CPerceptron &GetPerceptron()
    {
       return perceptron;
-   }
-
-   inline const CCI_FootBotProximitySensor::TReadings &GetProximityReadings()
-   {
-      return proximity->GetReadings();
-   }
-
-   inline const Real GetLeftSpeed()
-   {
-      return this->leftSpeed;
-   }
-
-   inline const Real GetRightSpeed()
-   {
-      return this->rightSpeed;
    }
 };
 

@@ -15,7 +15,7 @@
 
 
 \section{Controller Genetico}
-Per il controller genetico abbiamo deciso, ispirandoci al lavoro di \textit{Floreano e Mandola} \cite{genetic_evolution_nn},  di utilizzare una rete neurale addestrata attraverso un algoritmo genetico. In particolare in questo caso il robot viene controllato tramite una rete composta da 24 neuroni di input completamente connessi a due neuroni di output come mostrato in figura \ref{fig:genetic_network}.
+Per il controller genetico abbiamo deciso, ispirandoci al lavoro di \textit{Floreano e Mandola} \cite{genetic_evolution_nn},  di utilizzare una rete neurale addestrata con un algoritmo genetico. In particolare in questo caso il robot viene controllato da una rete composta da 24 neuroni di input completamente connessi a due neuroni di output come mostrato in figura \ref{fig:genetic_network}.
 Gli input vengono letti da 12 sensori di distanza accoppiati ognuno con il suo angolo (ricordiamo che l'angolo varia visto che il sensore di distanza ruota ad una certa velocità sul footbot); gli output rappresentano invece la velocità da assegnare alle ruote. Sia i valori degli input relativi alle distanze che i valori di output sono stati normalizzati nell'intervallo [0,1]; gli angoli sono invece stati inseriti in radianti con valori in [-$\pi$, $\pi$]
 \begin{figure}[h]
 \centering
@@ -25,8 +25,26 @@ Gli input vengono letti da 12 sensori di distanza accoppiati ognuno con il suo a
 \end{figure}
 
 
-Il genoma di ogni controller è rappresentato da un array di 50 numeri reali ((24 input + 1 bias) * 2  output = 50) corrispondenti ai pesi della rete.
-Sono stati utilizzati solo 12 dei 24 sensori presenti nel footbot per ridurre lo spazio di ricerca dell'algoritmo genetico: utilizzarli tutti avrebbe infatti richiesto una rete composta da 98 pesi ((48+1)*2) riducendo le performance dell'algoritmo sia in termini di tempi di esecuzione che tempi di convergenza.
+Per l'implementazione dell'algoritmo genetico, il genoma di ogni individuo è stato rappresentato da un array di 50 numeri reali ((24 input + 1 bias) * 2  output = 50) nell'intervallo [-15, 15] corrispondenti ai pesi della rete. Sono stati utilizzati solo 12 dei 24 sensori presenti nel footbot per ridurre lo spazio di ricerca dell'algoritmo: utilizzarli tutti avrebbe richiesto infatti una rete composta da 98 pesi ((48+1)*2) riducendo notevolmente le performance sia in termini di tempi di esecuzione che di convergenza.
+
+Per quanto riguarda l'evoluzione abbiamo utilizzato un approccio di tipo SteadyState in cui, ad ogni generazione, solo una certa pecentuale di individui viene sostituita dai nuovi ottenuti dalla prodecura di crossover e mutazione. Nel nostro caso in particolare la popolazione è composta da un totale di 50 individui e una percentuale di rimpiazzo pari al 50\%.  Abbiamo scelto il meccanismo di \textit{Roulette Wheel} per la selezione e di \textit{Gaussian Mutation} per la mutazione.
+Per quanto riguarda il crossover abbiamo invece sperimentato 3 diverse modalità: 
+\begin{itemize}
+\item{OnePointCrossover}: Si sceglie a caso un punto sui cromosomi di entrambi i genitori detto "punto di crossover"; i valori a destra di quel punto vengono scambiati tra i due genitori generando 2 nuovi cromosomi figli.
+\item{TwoPointCrossover}: Prevede di selezionare due punti di crossover: i valori tra i due punti vengono scambiati tra genitori.
+\item{UniformCrossover}: Ognuno dei 2 figli ha una uguale probabilità di ereditare un certo gene da uno dei suoi genitori.
+ \end{itemize}
+
+I parametri utilizzati nei vari test sono:
+Number of generations 500
+Population size 50
+Mutation probability 0.05
+Crossover probability 0.8
+Replacement percentage 0.5
+
+Per l'implementazione del codice in C++ è stata utilizzata la libreria GAlib\footnote{http://lancet.mit.edu/galib-2.4/} che mette a disposizione diverse funzionalità relative ai principali meccanismi degli algoritmi genetici.
+
+
 
 
 \bibliographystyle{unsrt}

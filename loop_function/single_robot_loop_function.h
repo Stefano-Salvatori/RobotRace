@@ -8,6 +8,7 @@
 /* The NN controller */
 #include <controllers/genetic_controller/genetic_controller.h>
 #include <controllers/motor_schema_controller/motor_schema.h>
+#include <controllers/common_controller.h>
 
 /* ARGoS-related headers */
 #include <argos3/core/simulator/loop_functions.h>
@@ -48,7 +49,7 @@ private:
    CVector2 startingSegmentV1;
    CVector2 startingSegmentV2;
    CFootBotEntity *footBot;
-   MotorSchemaController *controller;
+   CommonController *controller;
    Real *parameters;
    CRandom::CRNG *m_pcRNG;
 

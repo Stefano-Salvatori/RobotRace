@@ -1,4 +1,6 @@
 add_library(genetic_controller SHARED
+  common_controller.h
+  common_controller.cpp
   nn/neural_network.h
   nn/neural_network.cpp
   nn/perceptron.h
@@ -7,7 +9,14 @@ add_library(genetic_controller SHARED
   genetic_controller/genetic_controller.cpp
 )
 
+add_library(common_controller SHARED
+  common_controller.h
+  common_controller.cpp
+)
+
 add_library(motor_schema_controller SHARED
+  common_controller.h
+  common_controller.cpp
   ../loop_function/utils/utils.h
   ../loop_function/utils/utils.cpp
   motor_schema_controller/motor_schema.h

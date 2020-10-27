@@ -6,6 +6,7 @@ genetic*/*
 doc/*.pdf
 doc/res/*
 doc/*.gz
+frames/*
 
 .vscode/*
 
