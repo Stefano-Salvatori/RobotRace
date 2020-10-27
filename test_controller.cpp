@@ -20,7 +20,6 @@ void LaunchARGoS(int numTrials, double results[])
     /*
     * Run multiple trials and save results
     */
-    srand(time(NULL));
     for (size_t i = 0; i < numTrials; ++i)
     {
         cSimulator.SetRandomSeed(rand());
@@ -40,10 +39,12 @@ void LaunchARGoS(int numTrials, double results[])
 #define DEFAULT_NUM_TRIALS 10
 int main(int argc, char **argv)
 {
+    srand(time(NULL));
+
     int numTrials = DEFAULT_NUM_TRIALS;
     if (argc >= 2)
         numTrials = std::atoi(argv[1]);
-   
+
     argos::CSimulator &cSimulator = argos::CSimulator::GetInstance();
     cSimulator.SetExperimentFileName("test.argos");
     cSimulator.LoadExperiment();

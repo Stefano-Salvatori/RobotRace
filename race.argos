@@ -13,7 +13,7 @@
     <!-- * Controllers * -->
     <!-- *************** -->
     <controllers>
-        <genetic_controller id="genetic" library="build/controllers/libgenetic_controller.so">
+        <genetic_controller id="genetic_classic" library="build/controllers/libgenetic_controller.so">
             <actuators>
                 <differential_steering implementation="default" />
                 <leds implementation="default" medium="leds" />
@@ -23,7 +23,20 @@
                 <footbot_proximity implementation="default" show_rays="false" />
                 <footbot_distance_scanner implementation="rot_z_only" show_rays="false" />
             </sensors>
-            <params num_inputs="24" num_outputs="2" parameter_file="steady_state/one_point/best_200.dat" />
+            <params num_inputs="24" num_outputs="2" parameter_file="steady_state/one_point/best_500.dat" />
+        </genetic_controller>
+
+        <genetic_controller id="genetic_mutated" library="build/controllers/libgenetic_controller.so">
+            <actuators>
+                <differential_steering implementation="default" />
+                <leds implementation="default" medium="leds" />
+                <footbot_distance_scanner implementation="default" />
+            </actuators>
+            <sensors>
+                <footbot_proximity implementation="default" show_rays="false" />
+                <footbot_distance_scanner implementation="rot_z_only" show_rays="false" />
+            </sensors>
+            <params num_inputs="24" num_outputs="2" parameter_file="steady_state/one_point_pC0.9_pM0.05/best_500.dat" />
         </genetic_controller>
 
         <motor_schema_controller id="motor_schema" library="build/controllers/libmotor_schema_controller.so">
@@ -55,7 +68,7 @@
         finishSegmentV1="4,-7" finishSegmentV2="2,-7"
         startingSegmentV1="-0.2,7.5" startingSegmentV2="-1.8,7.5"
         numBots="2"
-        controllers="motor_schema,genetic"
+        controllers="genetic_mutated,motor_schema"
         debug="true" />
 
     <!-- *********************** -->
@@ -147,14 +160,5 @@
     <media />
 
 
-    <visualization>
-        <qt-opengl>
-            <camera>
-                <placement idx="0" position="2,2,2" look_at="1,1,1" />
-                <placement idx="1" position="0,0,10" look_at="0,0,0" />
-                <placement idx="2" position="3,3,4" look_at="1,6,0" />
-                <placement idx="3" position="2,3,2" look_at="0,1,0" />
-            </camera>
-        </qt-opengl>
-    </visualization>
+    <!-- <visualization> <qt-opengl> <camera> <placement idx="0" position="2,2,2" look_at="1,1,1" /> <placement idx="1" position="0,0,10" look_at="0,0,0" /> <placement idx="2" position="3,3,4" look_at="1,6,0" /> <placement idx="3" position="2,3,2" look_at="0,1,0" /> </camera> </qt-opengl> </visualization> -->
 </argos-configuration>

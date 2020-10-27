@@ -33,8 +33,6 @@ float LaunchARGoS(GAGenome &c_genome)
     * Run multiple trials and take the worst performance as final value.
     */
     Real worstPerformance = 1000;
-
-    srand(time(NULL));
     for (size_t i = 0; i < NUM_TRIALS; ++i)
     {
         cSimulator.SetRandomSeed(rand());
@@ -50,7 +48,6 @@ float LaunchARGoS(GAGenome &c_genome)
 
     return worstPerformance;
 }
-
 
 /*
  * Flush best individual
@@ -83,6 +80,8 @@ int FlushBest(const GARealGenome &c_genome,
 
 int main(int argc, char **argv)
 {
+    srand(time(NULL));
+
     if (argc < 2)
     {
         std::cerr << "Pass the folder name where the algorithm intermediate files will be stored." << std::endl;
@@ -129,7 +128,7 @@ int main(int argc, char **argv)
     /*
     * Launch the evolution, setting the random seed
     */
-    cGA.initialize(132);
+    cGA.initialize(rand());
     do
     {
         argos::LOG << "Generation #" << cGA.generation() << "...";

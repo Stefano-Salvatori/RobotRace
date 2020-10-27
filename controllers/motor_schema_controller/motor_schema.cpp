@@ -159,23 +159,18 @@ void MotorSchemaController::ControlStep()
 
 
     CRadians robotAngle = GetRobotAngle();
-    LOG << "ang: " << robotAngle.GetValue() << std::endl;
    
     CVector2 stay_on_path =  StayOnPath();
-    LOG << "path: " << ToPolarString(stay_on_path) << std::endl;
     
     CVector2 avoid_obstacoles = AvoidObstacoles();
-    LOG << "obs" << ToPolarString(avoid_obstacoles) << std::endl;
    
     CVector2 go_foreward(0,0);
     go_foreward.FromPolarCoordinates(GO_FOREWORD_VEC_LEN, -CRadians::PI_OVER_TWO - robotAngle);
-    LOG << "fore:"<< ToPolarString(go_foreward) << std::endl;
     
     // compute result vector
     std::vector<CVector2> schemas = {stay_on_path, avoid_obstacoles, go_foreward};
     CVector2 resultant = Vec2Summation(schemas);
     resultant.FromPolarCoordinates(resultant.Length() / schemas.size(), resultant.Angle());
-    LOG << "res:" << ToPolarString(resultant) << std::endl;
 
     // transform to differential model
     Real half_l = wheelsSensor->GetReading().WheelAxisLength / 2;
@@ -187,7 +182,6 @@ void MotorSchemaController::ControlStep()
     Real rightSpeed = Map(right_v, -1, 1, COURSE_VELOCITY, MAX_VELOCITY);
 
      wheels->SetLinearVelocity(leftSpeed, rightSpeed);
-    LOG << std::endl;
 }
 
 void MotorSchemaController::Reset()

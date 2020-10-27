@@ -22,7 +22,6 @@ vector<string> LaunchARGoS(int numRaces)
     /*
     * Run multiple trials and save winners
     */
-    srand(time(NULL));
     for (size_t i = 0; i < numRaces; i++)
     {
         cSimulator.SetRandomSeed(rand());
@@ -42,6 +41,8 @@ vector<string> LaunchARGoS(int numRaces)
 #define DEFAULT_NUM_RACES 10
 int main(int argc, char **argv)
 {
+    srand(time(NULL));
+    
     int numRaces = DEFAULT_NUM_RACES;
     if (argc >= 2)
         numRaces = atoi(argv[1]);

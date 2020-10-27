@@ -127,8 +127,8 @@ void SingleRobotLoopFunction::PostStep()
       //velocity scaled to [-1, 1]
       const Real avgRightSpeed = (this->totalStepRightWheelSpeed / SEGMENT_LENGTH) / CommonController::MAX_VELOCITY;
       const Real avgLeftSpeed = (this->totalStepLeftWheelSpeed / SEGMENT_LENGTH) / CommonController::MAX_VELOCITY;
-      const Real goStraight = 1 / (1 + abs(avgRightSpeed - avgLeftSpeed));
-      const Real goFast = abs((avgRightSpeed + avgLeftSpeed) / 2);
+      const Real goStraight = 1 - abs(avgRightSpeed - avgLeftSpeed) / 2;
+      const Real goFast = abs(avgRightSpeed + avgLeftSpeed) / 2;
 
       totalOnSegmentPerformance += avoidCollisions * avoidCollisions * goFast * goStraight;
 
@@ -185,7 +185,7 @@ void SingleRobotLoopFunction::Reset()
 
 void SingleRobotLoopFunction::ConfigureFromGenome(const GARealGenome &c_genome)
 {
-   GeneticController *geneticController = dynamic_cast<GeneticController*>(controller);
+   GeneticController *geneticController = dynamic_cast<GeneticController *>(controller);
    /* Copy the genes into the NN parameter buffer */
    for (size_t i = 0; i < geneticController->GENOME_SIZE; ++i)
    {
