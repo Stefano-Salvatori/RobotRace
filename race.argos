@@ -23,10 +23,27 @@
                 <footbot_proximity implementation="default" show_rays="false" />
                 <footbot_distance_scanner implementation="rot_z_only" show_rays="false" />
             </sensors>
-            <params num_inputs="24" num_outputs="2" parameter_file="steady_state/one_point/best_200.dat" />
+            <params num_inputs="24" num_outputs="2" parameter_file="steady_state/one_point/best_500.dat" />
         </genetic_controller>
 
-    <lua_controller id="motor_schema">
+    <motor_schema_controller id="motor_schema" library="build/controllers/libmotor_schema_controller.so">
+        <actuators>
+        <footbot_distance_scanner implementation="default" />
+        <differential_steering implementation="default" />
+        <leds implementation="default" medium="leds" />
+        </actuators>
+
+        <sensors>
+            <footbot_distance_scanner implementation="rot_z_only"/>
+            <differential_steering implementation="default" />
+            <footbot_proximity implementation="default" show_rays="true" />
+            <footbot_light implementation="rot_z_only" show_rays="false" noise_level="0.0" />
+            <positioning implementation="default" />
+        </sensors>
+        <params/>
+    </motor_schema_controller>
+
+    <lua_controller id="motor_schema_lua">
         <actuators>
         <footbot_distance_scanner implementation="default" />
         <differential_steering implementation="default" />
@@ -57,7 +74,7 @@
         finishSegmentV1="4,-7" finishSegmentV2="2,-7"
         startingSegmentV1="-0.2,7.5" startingSegmentV2="-1.8,7.5"
         numBots="2"
-        controllers="motor_schema,genetic"
+        controllers="motor_schema, genetic"
         debug="true" />
 
     <!-- *********************** -->

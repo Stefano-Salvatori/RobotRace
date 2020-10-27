@@ -8,6 +8,7 @@
 #include "loop_function/utils/utils.h"
 #include <string> // std::string, std::stod
 
+//#define DEBUG_LOG
 #define COLLISION_THRESHOLD 0.9
 #define SHORT_RANGE_MAX_DISTANCE 30
 #define SHORT_RANGE_MIN_DISTANCE 4
@@ -157,25 +158,34 @@ void MotorSchemaController::ControlStep()
         leds->SetAllColors(FOOTBOT_COLOR);
 
 
-
     CRadians robotAngle = GetRobotAngle();
+#ifdef DEBUG_LOG
     LOG << "ang: " << robotAngle.GetValue() << std::endl;
+#endif
    
     CVector2 stay_on_path =  StayOnPath();
+#ifdef DEBUG_LOG
     LOG << "path: " << ToPolarString(stay_on_path) << std::endl;
-    
+#endif
+
     CVector2 avoid_obstacoles = AvoidObstacoles();
+#ifdef DEBUG_LOG
     LOG << "obs" << ToPolarString(avoid_obstacoles) << std::endl;
-   
+#endif
+
     CVector2 go_foreward(0,0);
     go_foreward.FromPolarCoordinates(GO_FOREWORD_VEC_LEN, -CRadians::PI_OVER_TWO - robotAngle);
+#ifdef DEBUG_LOG
     LOG << "fore:"<< ToPolarString(go_foreward) << std::endl;
-    
+#endif
+
     // compute result vector
     std::vector<CVector2> schemas = {stay_on_path, avoid_obstacoles, go_foreward};
     CVector2 resultant = Vec2Summation(schemas);
     resultant.FromPolarCoordinates(resultant.Length() / schemas.size(), resultant.Angle());
+#ifdef DEBUG_LOG
     LOG << "res:" << ToPolarString(resultant) << std::endl;
+#endif
 
     // transform to differential model
     Real half_l = wheelsSensor->GetReading().WheelAxisLength / 2;
@@ -187,7 +197,9 @@ void MotorSchemaController::ControlStep()
     Real rightSpeed = Map(right_v, -1, 1, COURSE_VELOCITY, MAX_VELOCITY);
 
      wheels->SetLinearVelocity(leftSpeed, rightSpeed);
-    LOG << std::endl;
+#ifdef DEBUG_LOG
+     LOG << std::endl;
+#endif
 }
 
 void MotorSchemaController::Reset()
