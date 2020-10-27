@@ -17,6 +17,8 @@ add_library(common_controller SHARED
 add_library(motor_schema_controller SHARED
   common_controller.h
   common_controller.cpp
+  ../loop_function/utils/utils.h
+  ../loop_function/utils/utils.cpp
   motor_schema_controller/motor_schema.h
   motor_schema_controller/motor_schema.cpp
 )

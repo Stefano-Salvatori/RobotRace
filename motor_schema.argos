@@ -13,23 +13,39 @@
   <!-- * Controllers * -->
   <!-- *************** -->
   <controllers>
-    <lua_controller id="lua">
-
-      <actuators>
-      <footbot_distance_scanner implementation="default" />
-       <differential_steering implementation="default" />
-       <leds implementation="default" medium="leds" />
-      </actuators>
-
-      <sensors>
-        <footbot_distance_scanner implementation="rot_z_only" show_rays="true"/>
+ <motor_schema_controller id="ms" library="build/controllers/libmotor_schema_controller.so">
+        <actuators>
+        <footbot_distance_scanner implementation="default" />
         <differential_steering implementation="default" />
-        <footbot_proximity implementation="default" show_rays="true" />
-        <footbot_light implementation="rot_z_only" show_rays="false" noise_level="0.0" />
-        <positioning implementation="default" />
-      </sensors>
+        <leds implementation="default" medium="leds" />
+        </actuators>
 
-      <params script="controllers/motor_schema_controller/motor_schema.lua"/>
+        <sensors>
+            <footbot_distance_scanner implementation="rot_z_only"/>
+            <differential_steering implementation="default" />
+            <footbot_proximity implementation="default" show_rays="true" />
+            <footbot_light implementation="rot_z_only" show_rays="false" noise_level="0.0" />
+            <positioning implementation="default" />
+        </sensors>
+        <params/>
+    </motor_schema_controller>
+
+      <lua_controller id="lua">
+        <actuators>
+        <footbot_distance_scanner implementation="default" />
+        <differential_steering implementation="default" />
+        <leds implementation="default" medium="leds" />
+        </actuators>
+
+        <sensors>
+            <footbot_distance_scanner implementation="rot_z_only"/>
+            <differential_steering implementation="default" />
+            <footbot_proximity implementation="default" show_rays="true" />
+            <footbot_light implementation="rot_z_only" show_rays="false" noise_level="0.0" />
+            <positioning implementation="default" />
+        </sensors>
+
+        <params script="controllers/motor_schema_controller/motor_schema.lua"/>
     </lua_controller>
 
   </controllers>
@@ -132,7 +148,7 @@
     <!-- Place a foot-bot and bind it to the controller -->
     <foot-bot id="fb_0">
       <body position="-1, 7, 0" orientation="-90,0,0" />
-      <controller config="lua"/>
+      <controller config="ms"/>
     </foot-bot>
 
   </arena>

@@ -40,12 +40,22 @@ Real AngleBetweenPoints(const CVector2 &v1, const CVector2 &v2)
     return atan2(deltaY, deltaX);
 }
 
+/**
+ * Polar String
+ */
+std::string ToPolarString(const CVector2 &v1)
+{
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(2)  << "(" << v1.Length() << "," << v1.Angle().GetValue() * (180.0 / M_PI) << "°)";
+    return ss.str();
+}
+
 Real Map(Real x, Real in_min, Real in_max, Real out_min, Real out_max)
 {
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 } 
 
-    int Sign(CRadians r)
+int Sign(CRadians r)
 {
     if(r.GetValue() > 0) return 1;
     else if(r.GetValue() < 0) return -1;

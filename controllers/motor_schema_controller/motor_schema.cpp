@@ -4,6 +4,9 @@
 #include <argos3/core/utility/configuration/argos_configuration.h>
 #include <argos3/core/utility/logging/argos_log.h>
 #include <vector>
+#include <utility>
+#include "loop_function/utils/utils.h"
+#include <string> // std::string, std::stod
 
 #define COLLISION_THRESHOLD 0.9
 #define SHORT_RANGE_MAX_DISTANCE 30
@@ -68,9 +71,15 @@ void MotorSchemaController::Init(TConfigurationNode &t_node)
     }
 }
 
-Real MotorSchemaController::GetRobotAngle()
+CRadians MotorSchemaController::GetRobotAngle()
 {
-    return positioning->GetReading().Orientation.GetZ();
+    std::stringstream ss;
+    ss << positioning->GetReading().Orientation << std::endl;
+    std::string s = ss.str();
+    std::string s2 = s.substr(0, s.find(","));
+    CRadians c(0);
+    c.FromValueInDegrees(std::stod(s, 0));
+     return c;
 }
 
 CVector2 MotorSchemaController::StayOnPath()
@@ -89,7 +98,7 @@ CVector2 MotorSchemaController::StayOnPath()
         {
             Real length = ((LONG_RANGE_MAX_DISTANCE - d) / LONG_RANGE_MAX_DISTANCE);
             CRadians angle = -Sign(it->first) * CRadians::PI_OVER_TWO;
-            v.FromPolarCoordinates(length, CRadians(angle));
+            v.FromPolarCoordinates(length, angle);
         }
         forces.push_back(v);
     }
@@ -102,12 +111,12 @@ CVector2 MotorSchemaController::StayOnPath()
         if (d != -1 && d != -2 and d <= SHORT_RANGE_MAX_DISTANCE && d > SHORT_RANGE_MIN_DISTANCE)
         {
             Real length = ((SHORT_RANGE_MAX_DISTANCE - d) / SHORT_RANGE_MAX_DISTANCE);
-            CRadians angle = - (Sign(it->first) * CRadians::PI_OVER_TWO);
+            CRadians angle = - Sign(it->first) * CRadians::PI_OVER_TWO;
             v.FromPolarCoordinates(length, angle);
         }
         forces.push_back(v);
     }
-    CVector2 stayOnPath = Vec2PolarSummation(forces);
+    CVector2 stayOnPath = Vec2Summation(forces);
     stayOnPath.FromPolarCoordinates(stayOnPath.Length() / forces.size(), stayOnPath.Angle());
     return stayOnPath;
 }
@@ -123,12 +132,12 @@ CVector2 MotorSchemaController::AvoidObstacoles()
         forces.push_back(v);
     }
 
-    CVector2 avoidObs = Vec2PolarSummation(forces);
+    CVector2 avoidObs = Vec2Summation(forces);
     avoidObs.FromPolarCoordinates(avoidObs.Length() / forces.size(), avoidObs.Angle());
     return avoidObs;
 }
 
-CVector2 MotorSchemaController::Vec2PolarSummation(std::vector<CVector2> vecArray)
+CVector2 MotorSchemaController::Vec2Summation(std::vector<CVector2> vecArray)
 {
     CVector2 res(0,0);
     for(size_t i=0; i<vecArray.size(); i++){
@@ -147,34 +156,38 @@ void MotorSchemaController::ControlStep()
     else
         leds->SetAllColors(FOOTBOT_COLOR);
 
-    Real robotAngle = GetRobotAngle();
-    //LOG << "ang: " << robotAngle << std::endl;
 
-    CVector2 stay_on_path =  StayOnPath();
-    //LOG << "path: " << stay_on_path << std::endl;
 
-    CVector2 avoid_obstacoles = AvoidObstacoles();
-    //LOG << "obs" << avoid_obstacoles << std::endl;
+    CRadians robotAngle = GetRobotAngle();
+    LOG << "ang: " << robotAngle.GetValue() << std::endl;
    
-    CVector2 go_foreward;
-    go_foreward.FromPolarCoordinates(GO_FOREWORD_VEC_LEN, -CRadians::PI_OVER_TWO - CRadians(robotAngle));
-    //LOG << "fore:"<< go_foreward << std::endl;
+    CVector2 stay_on_path =  StayOnPath();
+    LOG << "path: " << ToPolarString(stay_on_path) << std::endl;
+    
+    CVector2 avoid_obstacoles = AvoidObstacoles();
+    LOG << "obs" << ToPolarString(avoid_obstacoles) << std::endl;
+   
+    CVector2 go_foreward(0,0);
+    go_foreward.FromPolarCoordinates(GO_FOREWORD_VEC_LEN, -CRadians::PI_OVER_TWO - robotAngle);
+    LOG << "fore:"<< ToPolarString(go_foreward) << std::endl;
     
     // compute result vector
     std::vector<CVector2> schemas = {stay_on_path, avoid_obstacoles, go_foreward};
-    CVector2 resultant = Vec2PolarSummation(schemas);
+    CVector2 resultant = Vec2Summation(schemas);
     resultant.FromPolarCoordinates(resultant.Length() / schemas.size(), resultant.Angle());
-    //log("res: " .. vec2str(resultant))
-   
+    LOG << "res:" << ToPolarString(resultant) << std::endl;
+
     // transform to differential model
     Real half_l = wheelsSensor->GetReading().WheelAxisLength / 2;
     Real left_v = resultant.Length() - (half_l * resultant.Angle().GetValue());
     Real right_v = resultant.Length() + (half_l * resultant.Angle().GetValue());
 
-    Real leftSpeed = Map(left_v, 0, 1, COURSE_VELOCITY, MAX_VELOCITY);
-    Real rightSpeed = Map(right_v, 0, 1, COURSE_VELOCITY, MAX_VELOCITY);
-    
-    wheels->SetLinearVelocity(leftSpeed,rightSpeed);
+
+    Real leftSpeed = Map(left_v, -1, 1, COURSE_VELOCITY, MAX_VELOCITY);
+    Real rightSpeed = Map(right_v, -1, 1, COURSE_VELOCITY, MAX_VELOCITY);
+
+     wheels->SetLinearVelocity(leftSpeed, rightSpeed);
+    LOG << std::endl;
 }
 
 void MotorSchemaController::Reset()
