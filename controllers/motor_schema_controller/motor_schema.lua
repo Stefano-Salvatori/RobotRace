@@ -106,24 +106,24 @@ end
 
 function step()
     local robotAngle = get_robot_angle()
-    --log("angle: " .. robotAngle)
+    log("angle: " .. robotAngle)
 
     local stay_on_path =  stay_on_path()
-    --log("path: " .. vec2str(stay_on_path))
+    log("path: " .. vec2str(stay_on_path))
 
     local avoid_obstacoles = avoid_obstacoles()
-    --log("obs: " .. vec2str(avoid_obstacoles))
+    log("obs: " .. vec2str(avoid_obstacoles))
 
     local go_foreward = vector.zero()
     go_foreward.length = GO_FOREWORD_VEC_LEN
     go_foreward.angle = -PI/2 - robotAngle
-    --log("fore: " .. vec2str(go_foreward))
+    log("fore: " .. vec2str(go_foreward))
 
     -- compute result vector
     local schemas = {stay_on_path, avoid_obstacoles, go_foreward}
     local resultant = vec2_polar_summation(schemas);
     resultant.length = resultant.length / #schemas
-    --log("res: " .. vec2str(resultant))
+    log("res: " .. vec2str(resultant))
 
     -- transform to differential model
     left_v = ((resultant.length ) - (half_l * resultant.angle)) 

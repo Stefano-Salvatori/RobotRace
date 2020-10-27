@@ -32,6 +32,10 @@ CVector2 SubdivideSegment(const CVector2 &v1, const CVector2 &v2, Real k);
  */
 Real AngleBetweenPoints(const CVector2 &v1, const CVector2 &v2);
 
+/**
+ * Polar String
+ */
+std::string ToPolarString(const CVector2 &v1);
 
 Real Map(Real x, Real in_min, Real in_max, Real out_min, Real out_max);
 

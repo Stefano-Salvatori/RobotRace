@@ -57,13 +57,13 @@ private:
    /* Wheel speeds */
    Real leftSpeed, rightSpeed = 0.0;
 
-   Real GetRobotAngle();
+   CRadians GetRobotAngle();
 
    CVector2 StayOnPath();
 
    CVector2 AvoidObstacoles();
 
-   CVector2 Vec2PolarSummation(std::vector<CVector2> vacArray);
+   CVector2 Vec2Summation(std::vector<CVector2> vacArray);
 
 public:
    static const Real MAX_VELOCITY;

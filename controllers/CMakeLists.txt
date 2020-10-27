@@ -8,6 +8,8 @@ add_library(genetic_controller SHARED
 )
 
 add_library(motor_schema_controller SHARED
+  ../loop_function/utils/utils.h
+  ../loop_function/utils/utils.cpp
   motor_schema_controller/motor_schema.h
   motor_schema_controller/motor_schema.cpp
 )
