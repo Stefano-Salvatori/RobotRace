@@ -76,7 +76,7 @@ void SingleRobotLoopFunction::Init(TConfigurationNode &t_node)
        "genetic_nn" // controller id as set in the XML
    );
    AddEntity(*footBot);
-   controller = &dynamic_cast<MotorSchemaController &>(footBot->GetControllableEntity().GetController());
+   controller = &dynamic_cast<CommonController &>(footBot->GetControllableEntity().GetController());
 
    /* Add Random obstacles in the map */
    AddObstacles();
@@ -125,8 +125,8 @@ void SingleRobotLoopFunction::PostStep()
       const Real avoidCollisions = 1 - this->totalStepProximity / SEGMENT_LENGTH;
 
       //velocity scaled to [-1, 1]
-      const Real avgRightSpeed = (this->totalStepRightWheelSpeed / SEGMENT_LENGTH) / GeneticController::MAX_VELOCITY;
-      const Real avgLeftSpeed = (this->totalStepLeftWheelSpeed / SEGMENT_LENGTH) / GeneticController::MAX_VELOCITY;
+      const Real avgRightSpeed = (this->totalStepRightWheelSpeed / SEGMENT_LENGTH) / CommonController::MAX_VELOCITY;
+      const Real avgLeftSpeed = (this->totalStepLeftWheelSpeed / SEGMENT_LENGTH) / CommonController::MAX_VELOCITY;
       const Real goStraight = 1 / (1 + abs(avgRightSpeed - avgLeftSpeed));
       const Real goFast = abs((avgRightSpeed + avgLeftSpeed) / 2);
 
@@ -185,13 +185,14 @@ void SingleRobotLoopFunction::Reset()
 
 void SingleRobotLoopFunction::ConfigureFromGenome(const GARealGenome &c_genome)
 {
+   GeneticController *geneticController = dynamic_cast<GeneticController*>(controller);
    /* Copy the genes into the NN parameter buffer */
-   /*for (size_t i = 0; i < controller->GENOME_SIZE; ++i)
+   for (size_t i = 0; i < geneticController->GENOME_SIZE; ++i)
    {
       parameters[i] = c_genome[i];
-   }*/
+   }
    /* Set the NN parameters */
-   // controller->GetPerceptron().SetOnlineParameters(controller->GENOME_SIZE, parameters);
+   geneticController->GetPerceptron().SetOnlineParameters(geneticController->GENOME_SIZE, parameters);
 }
 
 /****************************************/

@@ -12,9 +12,6 @@
 //Number of trials foreach genome
 #define NUM_TRIALS 5
 
-/****************************************/
-/****************************************/
-
 /*
  * Launch ARGoS to evaluate a genome.
  */

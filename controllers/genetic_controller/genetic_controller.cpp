@@ -11,8 +11,6 @@
 #define LONG_RANGE_MAX_DISTANCE 150
 #define ROTATION_SPEED 50
 
-const Real GeneticController::MAX_VELOCITY = 20.0f;
-
 // Formula for number of parameters:
 //  (Input + 1) * Output
 // We have 12 distance values, 12 angles and 2 wheels actuators
@@ -20,24 +18,13 @@ const Real GeneticController::MAX_VELOCITY = 20.0f;
 const int GeneticController::GENOME_SIZE = 50;
 
 static CRange<Real> NN_OUTPUT_RANGE(0.0f, 1.0f);
-static CRange<Real> WHEEL_ACTUATION_RANGE(-GeneticController::MAX_VELOCITY, GeneticController::MAX_VELOCITY);
+static CRange<Real> WHEEL_ACTUATION_RANGE(-CommonController::MAX_VELOCITY, CommonController::MAX_VELOCITY);
 static const CColor FOOTBOT_COLOR = CColor::GREEN;
 
 GeneticController::GeneticController() {}
 
 GeneticController::~GeneticController()
 {
-}
-
-const Real GeneticController::GetMaxProximityValue()
-{
-    const CCI_FootBotProximitySensor::TReadings &proxReads = proximity->GetReadings();
-    Real maxProximity = proxReads[0].Value;
-    for (size_t i = 0; i < proxReads.size(); ++i)
-    {
-        maxProximity = Max(maxProximity, proxReads[i].Value);
-    }
-    return maxProximity;
 }
 
 void GeneticController::Init(TConfigurationNode &t_node)
