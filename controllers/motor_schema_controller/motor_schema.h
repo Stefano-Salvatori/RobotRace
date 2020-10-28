@@ -22,6 +22,7 @@
 #include <vector>
 #include <argos3/core/utility/math/vector2.h>
 #include <utility>
+#include <controllers/common_controller.h>
 #include "loop_function/utils/utils.h"
 
 /*
@@ -30,32 +31,12 @@
  */
 using namespace argos;
 
-class MotorSchemaController : public CCI_Controller
+class MotorSchemaController : public CommonController
 {
 private:
-   /* Pointer to the differential steering actuator */
-   CCI_DifferentialSteeringActuator *wheels;
    CCI_DifferentialSteeringSensor *wheelsSensor;
-   /* Pointer to the foot-bot proximity sensor */
-   CCI_FootBotProximitySensor *proximity;
-
-   CCI_FootBotDistanceScannerSensor *distanceScannerSensor;
-   CCI_FootBotDistanceScannerActuator *distanceScannerActuator;
-
-   /* Pointer to the foot-bot proximity sensor */
-   CCI_LEDsActuator *leds;
-
+   
    CCI_PositioningSensor *positioning;
-
-   /*
-    * The following variables are used as parameters for the
-    * algorithm. You can set their value in the <parameters> section
-    * of the XML configuration file, under the
-    * <controllers><footbot_diffusion_controller> section.
-    */
-
-   /* Wheel speeds */
-   Real leftSpeed, rightSpeed = 0.0;
 
    CRadians GetRobotAngle();
 
@@ -66,8 +47,6 @@ private:
    CVector2 Vec2Summation(std::vector<CVector2> vacArray);
 
 public:
-   static const Real MAX_VELOCITY;
-
    /* Class constructor. */
    MotorSchemaController();
 
@@ -98,25 +77,6 @@ public:
     */
    virtual void Destroy();
 
-   /**
-    * Get the max proximity value read from the sensor
-    */
-   const Real GetMaxProximityValue();
-
-   inline const CCI_FootBotProximitySensor::TReadings &GetProximityReadings()
-   {
-      return proximity->GetReadings();
-   }
-
-   inline const Real GetLeftSpeed()
-   {
-      return this->leftSpeed;
-   }
-
-   inline const Real GetRightSpeed()
-   {
-      return this->rightSpeed;
-   }
 };
 
 #endif

@@ -19,24 +19,12 @@
 #define GO_FOREWORD_VEC_LEN  0.1
 #define COURSE_VELOCITY 15
 
-const Real MotorSchemaController::MAX_VELOCITY = 20.0f;
-static const CColor FOOTBOT_COLOR = CColor::GREEN;
+static const CColor FOOTBOT_COLOR = CColor::YELLOW;
 
 MotorSchemaController::MotorSchemaController() {}
 
 MotorSchemaController::~MotorSchemaController()
 {
-}
-
-const Real MotorSchemaController::GetMaxProximityValue()
-{
-    const CCI_FootBotProximitySensor::TReadings &proxReads = proximity->GetReadings();
-    Real maxProximity = proxReads[0].Value;
-    for (size_t i = 0; i < proxReads.size(); ++i)
-    {
-        maxProximity = Max(maxProximity, proxReads[i].Value);
-    }
-    return maxProximity;
 }
 
 void MotorSchemaController::Init(TConfigurationNode &t_node)
@@ -68,7 +56,7 @@ void MotorSchemaController::Init(TConfigurationNode &t_node)
     }
     catch (CARGoSException &ex)
     {
-        THROW_ARGOSEXCEPTION_NESTED("Error initializing the perceptron network", ex);
+        THROW_ARGOSEXCEPTION_NESTED("Error initializing the controller", ex);
     }
 }
 

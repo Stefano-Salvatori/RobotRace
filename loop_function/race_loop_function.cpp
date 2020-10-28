@@ -56,9 +56,6 @@ void RaceLoopFunction::Init(TConfigurationNode &t_node)
         m_pcRNG = CRandom::CreateRNG("argos");
 
         GetNodeAttributeOrDefault(t_node, "numBots", numBots, DEFAULT_NUM_BOTS);
-        //bots.reserve(numBots);
-        //controllers.reserve(numBots);
-
         std::string controllersNames;
         GetNodeAttributeOrDefault(t_node, "controllers", controllersNames, std::string(""));
 
