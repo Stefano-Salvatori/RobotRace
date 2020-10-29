@@ -9,14 +9,13 @@
 #include <string> // std::string, std::stod
 
 //#define DEBUG_LOG
-#define COLLISION_THRESHOLD 0.9
 #define SHORT_RANGE_MAX_DISTANCE 30
 #define SHORT_RANGE_MIN_DISTANCE 4
 
 #define LONG_RANGE_MAX_DISTANCE 150
 #define LONG_RANGE_MIN_DISTANCE 20
 #define ROTATION_SPEED 100
-#define GO_FOREWORD_VEC_LEN  0.1
+#define GO_FOREWORD_VEC_LEN 0.1
 #define COURSE_VELOCITY 15
 
 static const CColor FOOTBOT_COLOR = CColor::YELLOW;
@@ -41,7 +40,6 @@ void MotorSchemaController::Init(TConfigurationNode &t_node)
         wheelsSensor = GetSensor<CCI_DifferentialSteeringSensor>("differential_steering");
         distanceScannerSensor = GetSensor<CCI_FootBotDistanceScannerSensor>("footbot_distance_scanner");
         distanceScannerActuator = GetActuator<CCI_FootBotDistanceScannerActuator>("footbot_distance_scanner");
-
     }
     catch (CARGoSException &ex)
     {
@@ -68,7 +66,7 @@ CRadians MotorSchemaController::GetRobotAngle()
     std::string s2 = s.substr(0, s.find(","));
     CRadians c(0);
     c.FromValueInDegrees(std::stod(s, 0));
-     return c;
+    return c;
 }
 
 CVector2 MotorSchemaController::StayOnPath()
@@ -80,7 +78,7 @@ CVector2 MotorSchemaController::StayOnPath()
     for (CCI_FootBotDistanceScannerSensor::TReadingsMap::const_iterator it = tLongDistanceReads.begin(); it != tLongDistanceReads.end(); ++it)
     {
         Real d = it->second;
-        CVector2 v(0,0);
+        CVector2 v(0, 0);
         v.FromPolarCoordinates(1, CRadians::ZERO);
 
         if (d != -1 && d != -2 and d <= LONG_RANGE_MAX_DISTANCE && d > LONG_RANGE_MIN_DISTANCE)
@@ -95,12 +93,12 @@ CVector2 MotorSchemaController::StayOnPath()
     for (CCI_FootBotDistanceScannerSensor::TReadingsMap::const_iterator it = tShortDistanceReads.begin(); it != tShortDistanceReads.end(); ++it)
     {
         Real d = it->second;
-        CVector2 v(0,0);
+        CVector2 v(0, 0);
         v.FromPolarCoordinates(1, CRadians::ZERO);
         if (d != -1 && d != -2 and d <= SHORT_RANGE_MAX_DISTANCE && d > SHORT_RANGE_MIN_DISTANCE)
         {
             Real length = ((SHORT_RANGE_MAX_DISTANCE - d) / SHORT_RANGE_MAX_DISTANCE);
-            CRadians angle = - Sign(it->first) * CRadians::PI_OVER_TWO;
+            CRadians angle = -Sign(it->first) * CRadians::PI_OVER_TWO;
             v.FromPolarCoordinates(length, angle);
         }
         forces.push_back(v);
@@ -116,7 +114,7 @@ CVector2 MotorSchemaController::AvoidObstacoles()
     std::vector<CVector2> forces;
     for (size_t i = 0; i < proxReads.size(); i++)
     {
-        CVector2 v(0,0);
+        CVector2 v(0, 0);
         v.FromPolarCoordinates(proxReads[i].Value, CRadians::PI_OVER_TWO + proxReads[i].Angle);
         forces.push_back(v);
     }
@@ -128,8 +126,9 @@ CVector2 MotorSchemaController::AvoidObstacoles()
 
 CVector2 MotorSchemaController::Vec2Summation(std::vector<CVector2> vecArray)
 {
-    CVector2 res(0,0);
-    for(size_t i=0; i<vecArray.size(); i++){
+    CVector2 res(0, 0);
+    for (size_t i = 0; i < vecArray.size(); i++)
+    {
         res += vecArray[i];
     }
     return res;
@@ -140,18 +139,20 @@ void MotorSchemaController::ControlStep()
 
     /* Get readings from proximity sensor */
     Real maxProximity = GetMaxProximityValue();
-    if (maxProximity > COLLISION_THRESHOLD)
+    if (maxProximity > CommonController::COLLIISION_THRESHOLD)
+    {
+        numCollisions++;
         leds->SetAllColors(CColor::RED);
+    }
     else
         leds->SetAllColors(FOOTBOT_COLOR);
-
 
     CRadians robotAngle = GetRobotAngle();
 #ifdef DEBUG_LOG
     LOG << "ang: " << robotAngle.GetValue() << std::endl;
 #endif
-   
-    CVector2 stay_on_path =  StayOnPath();
+
+    CVector2 stay_on_path = StayOnPath();
 #ifdef DEBUG_LOG
     LOG << "path: " << ToPolarString(stay_on_path) << std::endl;
 #endif
@@ -161,10 +162,10 @@ void MotorSchemaController::ControlStep()
     LOG << "obs" << ToPolarString(avoid_obstacoles) << std::endl;
 #endif
 
-    CVector2 go_foreward(0,0);
+    CVector2 go_foreward(0, 0);
     go_foreward.FromPolarCoordinates(GO_FOREWORD_VEC_LEN, -CRadians::PI_OVER_TWO - robotAngle);
 #ifdef DEBUG_LOG
-    LOG << "fore:"<< ToPolarString(go_foreward) << std::endl;
+    LOG << "fore:" << ToPolarString(go_foreward) << std::endl;
 #endif
 
     // compute result vector
@@ -180,18 +181,18 @@ void MotorSchemaController::ControlStep()
     Real left_v = resultant.Length() - (half_l * resultant.Angle().GetValue());
     Real right_v = resultant.Length() + (half_l * resultant.Angle().GetValue());
 
+    this->leftSpeed = Map(left_v, -1, 1, COURSE_VELOCITY, MAX_VELOCITY);
+    this->rightSpeed = Map(right_v, -1, 1, COURSE_VELOCITY, MAX_VELOCITY);
 
-    Real leftSpeed = Map(left_v, -1, 1, COURSE_VELOCITY, MAX_VELOCITY);
-    Real rightSpeed = Map(right_v, -1, 1, COURSE_VELOCITY, MAX_VELOCITY);
-
-     wheels->SetLinearVelocity(leftSpeed, rightSpeed);
+    wheels->SetLinearVelocity(leftSpeed, rightSpeed);
 #ifdef DEBUG_LOG
-     LOG << std::endl;
+    LOG << std::endl;
 #endif
 }
 
 void MotorSchemaController::Reset()
 {
+    numCollisions = 0;
     distanceScannerActuator->Enable();
     distanceScannerActuator->SetRPM(ROTATION_SPEED);
     leds->SetAllColors(FOOTBOT_COLOR);

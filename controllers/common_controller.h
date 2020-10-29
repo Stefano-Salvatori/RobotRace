@@ -16,9 +16,6 @@
 #include <argos3/plugins/robots/generic/control_interface/ci_leds_actuator.h>
 #include <vector>
 
-
-
-
 /*
  * All the ARGoS stuff in the 'argos' namespace.
  * With this statement, you save typing argos:: every time.
@@ -28,6 +25,8 @@ using namespace argos;
 class CommonController : public CCI_Controller
 {
 protected:
+
+   size_t numCollisions = 0;
    /* Pointer to the differential steering actuator */
    CCI_DifferentialSteeringActuator *wheels;
 
@@ -52,6 +51,8 @@ protected:
 
 public:
    static const Real MAX_VELOCITY;
+   static const Real COLLIISION_THRESHOLD;
+
    /* Class constructor. */
    CommonController();
 
@@ -109,6 +110,11 @@ public:
    inline const Real GetRightSpeed()
    {
       return this->rightSpeed;
+   }
+
+   inline size_t GetNumCollisions()
+   {
+      return this->numCollisions;
    }
 };
 

@@ -76,6 +76,15 @@ public:
     * Return the index of the winning robot
     */
    std::string Winner();
+
+   inline void PrintNumCollisions(std::ostream& output)
+   {
+      for (size_t i = 0; i < bots.size(); i++)
+      {
+         size_t n = (&dynamic_cast<CommonController &>(bots[i].GetControllableEntity().GetController()))->GetNumCollisions();
+         output << bots[i].GetControllableEntity().GetController().GetId() << "\t" << n << std::endl;
+      }
+   }
 };
 
 #endif

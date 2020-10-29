@@ -21,9 +21,9 @@
       </actuators>
       <sensors>
         <footbot_proximity implementation="default" show_rays="false" />
-        <footbot_distance_scanner implementation="rot_z_only" show_rays="false" />
+        <footbot_distance_scanner implementation="rot_z_only" show_rays="false" noise_level="0.0" />
       </sensors>
-      <params num_inputs="24" num_outputs="2" parameter_file="steady_state/one_point_pC0.9_pM0.05/best_500.dat" />
+      <params num_inputs="24" num_outputs="2" parameter_file="steady_state/one_point/best_500.dat" />
     </genetic_controller>
 
     <motor_schema_controller id="genetic_nn_1" library="build/controllers/libmotor_schema_controller.so">

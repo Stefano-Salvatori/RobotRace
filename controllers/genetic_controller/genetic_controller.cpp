@@ -6,7 +6,6 @@
 #include <argos3/core/utility/math/vector2.h>
 #include <argos3/core/utility/logging/argos_log.h>
 
-#define COLLISION_THRESHOLD 0.9
 #define SHORT_RANGE_MAX_DISTANCE 30
 #define LONG_RANGE_MAX_DISTANCE 150
 #define ROTATION_SPEED 50
@@ -62,8 +61,11 @@ void GeneticController::ControlStep()
 {
     /* Get readings from proximity sensor */
     Real maxProximity = GetMaxProximityValue();
-    if (maxProximity > COLLISION_THRESHOLD)
+    if (maxProximity > CommonController::COLLIISION_THRESHOLD)
+    {
+        numCollisions++;
         leds->SetAllColors(CColor::RED);
+    }
     else
         leds->SetAllColors(FOOTBOT_COLOR);
 
@@ -112,6 +114,7 @@ void GeneticController::ControlStep()
 
 void GeneticController::Reset()
 {
+    numCollisions = 0;
     perceptron.Reset();
     distanceScannerActuator->Enable();
     distanceScannerActuator->SetRPM(ROTATION_SPEED);

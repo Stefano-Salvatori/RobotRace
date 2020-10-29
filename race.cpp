@@ -16,9 +16,12 @@ using namespace std;
 vector<string> LaunchARGoS(int numRaces)
 {
     static argos::CSimulator &cSimulator = argos::CSimulator::GetInstance();
-    static RaceLoopFunction &cLoopFunctions = dynamic_cast<RaceLoopFunction &>(cSimulator.GetLoopFunctions());
+    static RaceLoopFunction &loopFunction = dynamic_cast<RaceLoopFunction &>(cSimulator.GetLoopFunctions());
 
     vector<string> winners;
+     ostringstream cOSS;
+    cOSS << "collisions.txt";
+    ofstream cOFS(cOSS.str().c_str(), ios::out | ios::trunc);
     /*
     * Run multiple trials and save winners
     */
@@ -30,19 +33,17 @@ vector<string> LaunchARGoS(int numRaces)
         /* Run the experiment */
         cSimulator.Execute();
         /* Update performance */
-        winners.push_back(cLoopFunctions.Winner());
+        winners.push_back(loopFunction.Winner());
+        loopFunction.PrintNumCollisions(cOFS);
     }
     return winners;
 }
-
-/****************************************/
-/****************************************/
 
 #define DEFAULT_NUM_RACES 10
 int main(int argc, char **argv)
 {
     srand(time(NULL));
-    
+
     int numRaces = DEFAULT_NUM_RACES;
     if (argc >= 2)
         numRaces = atoi(argv[1]);
@@ -68,9 +69,6 @@ int main(int argc, char **argv)
     }
     cOFS.close();
 
-    /*
-    * Dispose of ARGoS stuff
-    */
     cSimulator.Destroy();
 
     /* All is OK */

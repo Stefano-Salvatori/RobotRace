@@ -54,7 +54,7 @@
         startingSegmentV1="-0.2,7.5" startingSegmentV2="-1.8,7.5"
         numBots="2"
         controllers="genetic, motor_schema"
-        debug="true" />
+        debug="false" />
 
     <!-- *********************** -->
     <!-- * Arena configuration * -->

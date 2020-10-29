@@ -95,9 +95,9 @@ int main(int argc, char **argv)
     /* Create a genome using LaunchARGoS() to evaluate it */
     GARealGenome cGenome(GeneticController::GENOME_SIZE, cAlleleSet, LaunchARGoS);
 
-    GASteadyStateGA cGA(cGenome);
+    GASimpleGA cGA(cGenome);
     cGA.maximize(); // the objective function must be maximized
-    cGA.crossover(GARealOnePointCrossover);
+    cGA.crossover(GARealUniformCrossover);
 
     // load parameters
     std::ifstream parametersFile("genetic_parameters.conf");
