@@ -1,9 +1,7 @@
 # RobotRace
-Codice per il progetto di Sistemi Intelligenti e Robotici. <br>
+In this project we implemented two robot controllers that compete in an obstacle course.  Each robot wants to reach the end of the track before the opponent avoiding collisions.
 
-In questo progetto sono stati implementati due controllori di robot che gareggiano in un percorso ad ostacoli.  L’obiettivo di ogni agente è raggiungere la fine del tracciato prima dell’avversario evitando le collisioni.
+The first controller was designed manually using Motor Schemas; the other one was designed using a genetic algorithm applied to a neural network;
 
-Il primo controller è stato progettato manualmente utilizzando il paradigma a motor schema, mentre il secondo è stato progettato utilizzando un algoritmo genetico applicato ad una rete neurale.
-
-Visita: https://stefanosalvatori.github.io/RobotRace-Examples/ per un esempio dei risultati
+Vist: https://stefanosalvatori.github.io/RobotRace-Examples/ to see the results.
 
