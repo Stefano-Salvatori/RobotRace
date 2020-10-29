@@ -1,68 +1,153 @@
-\documentclass[]{report}
+\documentclass[UTF8]{article}
 \usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{subcaption}
+\usepackage{makeidx}
+\usepackage{listings}
+
+
+
 \graphicspath{ {./res/} }
+\makeindex
 
 
 % Title Page
-\title{RobotRace}
+\title{%
+    RobotRace 
+    \\
+    \large Elaborato in Sistemi Intelligenti e Robotici}
+
 \author{Stefano Salvatori, Riccardo Salvatori}
 
 
 \begin{document}
 \maketitle
 
+\clearpage
+
+\tableofcontents{}
+
+\clearpage
+
+
 \section{Introduzione}
+In questo progetto sono stati implementati due controllori di robot che gareggiano in un percorso ad ostacoli. L'obiettivo di ogni agente è raggiungere la fine del tracciato prima dell'avversario evitando le collisioni.
+
+Il primo controller è stato progettato manualmente  utilizzando il paradigma a motor schema, mentre il secondo è stato progettato utilizzando un algoritmo genetico applicato ad una rete neurale.
+
+Le due soluzioni sono state analizzate singolarmente per avere delle misure di base delle performance, ed in seguito confrontate nella gara vera e propria in modo da vedere come la presenza di un secondo robot influisse sui risultati.
+
+Lavori nell'ambito delle gare tra robot sono già stati proposti in letteratura, in particolare in ambiente di simulazione software: TORCS\footnote{http://torcs.sourceforge.net/} è sicuramente il programma più noto ed è stato utilizzato in diversi paper  (\cite{neuroev_torcs},\cite{ga_torcs},\cite{fuzzy_ev}) per mostrare come controller basati su tecniche evolutive possano competere con quelli implementati dagli umani.
+
+Particolare attenzione viene posta in molti casi anche all'aspetto competitivo del problema: in \cite{neuroev_torcs} gli autori mostrano come sia possibile aggiungere ad un controller pre-addestrato alla guida in solitaria, abilità per sorpassare ed evitare avversari nel percorso; (\cite{Liniger_2014}) propone modelli di ottimizzazione matematica e programmazione quadratica per la guida automatica in competizioni di macchinine elettriche; \textit{Spica et al.}(\cite{gt_competition}) propongono di utilizzare la teoria dei giochi per risolvere il problema della guida autonoma in un ambiente competitivo.
+
+Nel nostro caso, a differenza degli esempi citati, l'aspetto di competizione tra robot non è stato considerato direttamente in fase di design, ma è stato invece utilizzato come metrica di confronto tra i controller durante la fase di test. 
+
+
+
+\section{Setup sperimentale}
+Tutti gli esperimenti sono stati eseguiti in simulazione tramite ARGoS\footnote{https://www.argos-sim.info/}. Abbiamo utilizzato un footbot come tipologia di robot con i seguenti sensori:
+\begin{itemize}
+    \item \textit{distance scanner}:  E' un dispositivo rotante con quattro sensori. Due sensori sono a corto raggio (da 4 cm a 30 cm) e due a lungo raggio (da 20 cm a 150 cm). Ogni sensore restituisce fino a 6 valori ad ogni passo temporale, per un totale di 24 letture (12 a corto raggio e 12 a lungo raggio). Ogni lettura è una tabella composta da angolo in radianti e distanza in cm. 
+    \item \textit{proximity}: Composto da 24 sensori distribuiti ad anello attorno al corpo del robot. Ogni sensore ha una portata di 10 cm e restituisce una lettura composta da un angolo in radianti e un valore compreso nell'intervallo [0,1].
+    \item \textit{positioning}: Permette di avere orientamento e posizione del robot (nei nostri test la posizione non è stata utilizzata).
+
+\end{itemize}
+e attuatori
+\begin{itemize}
+    \item \textit{distance scanner}: necessario per impostare la velocità di rotazione del relativo sensore.
+    \item \textit{differential steering}: permette di regolare la velocità delle ruote. Nei nostri test abiamo deciso di limitare la velocità nell'intervallo [-20, 20].
+\end{itemize}
+
+
+I test sono stati eseguiti su un percorso delimitato da pareti e con ostacoli inseriti casualmente in quantità e posizioni predefinite. Il percorso ha una linea di partenza da cui i robot partono (ogni volta in posizioni diverse sulla linea) ed una linea di arrivo che i robot devono raggiungere. Un esempio è mostrato in figura \ref{fig:track_example}. Ogni simulazione si ritiene conclusa in due casi: il robot raggiunge la linea di arrivo, oppure il tempo di simulazione termina. Il valore di durata massima della simulazione è stato valutato empiricamente ed impostato nei test a 5000 tick.
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.9\textwidth]{track_example.png}
+\caption{Istanza di un possibile percorso utilizzato per i test dei controller. La linea di partenza si trova sulla sinistra, in corrispondenza del robot, mentre l'arrivo è posizionato in altro a destra}
+\label{fig:track_example}
+\end{figure}
 
 \section{Motor Schema}
- Per l'implementazione attraverso motor schema si è deciso di implementare 3 comportamenti principali: "go foreword", "stay on path" e "avoid obstacoles", associando ad ognuno il relativo campo di forze.
- Ogni campo genera un vettore di lunghezza compresa tra 0 e 1; i valori vengono poi combinati per generare il vettore risultante che determinerà la  velocità traslazionale ed angolare del robot.
- Per determinare i valori di rotazione delle ruote (destra e sinistra), è necessario passare dal modello traslazionale a quello differenziale, attraverso le formule:
- 
- \subsection{Go Foreword}
- 
- Per implementare questo comportamento viene specificato un campo "uniforme" direzionato veso la meta, permettendo al robot di muoversi verso di essa.
- L'intensità dal campo è costante, la direzione assoluta è costane ma, essendo calcolata sul riferimento del robot, dipende dall'orientamento relativo del footbot.
+ Per l'implementazione attraverso motor schema abbiamo deciso di progettare 3 comportamenti principali: "go foreward", "stay on path" e "avoid obstacoles", associando ad ognuno di essi il relativo campo di forze.
+ Ogni campo genera un vettore di lunghezza compresa tra 0 e 1; i valori vengono poi combinati per generare un singolo vettore che determinerà la  velocità traslazionale ($v$) ed angolare ($w$) del robot.
+ Per calcolare i valori di rotazione delle ruote (destra e sinistra), si passa dal modello traslazionale a quello differenziale, attraverso la formula:
+\[
+\begin{bmatrix}
+v_{l}\\ 
+v_{r}\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+1 & -\frac{L}{2} \\ 
+1 & \frac{L}{2}\\
+\end{bmatrix}
+\begin{bmatrix}
+v\\ 
+w\\
+\end{bmatrix}\]
 
-$$
-V_{angle} = 0
-$$
-$$
-V_{length} = C
-$$
+Dove $L$ rappresenta la distanza tra le due ruote
+
+
+ \subsection{Behaviours}
+ \subsubsection{Go Foreward}
+ Per implementare questo comportamento viene specificato un campo di forze "uniforme", direzionato verso la meta, che "spinge" il robot verso di essa.
+ Intensità e direzione (assoluta) del campo sono costanti, ma quest'ultima, essendo calcolata sul riferimento del robot, dipende dal suo orientamento (relativo).
+ Considerando che il footbot parte girato di 90° ($ -\frac{\pi}{2}$), le componenti del vettore risultano essere:
+
+\[V_{angle} =  -\frac{\pi}{2}\ - \alpha\]
+\[V_{length} = C\]
+
+Dove $\alpha$ è l'orientamento relativo del robot, mentre
+$C$ rappresenta un valore costante (nel nostro caso $C=0.1$).
 
  
- 
- \subsection{Stay On Path} 
+
+ \subsubsection{Stay On Path} 
  Definisce un campo di forza "perpendicolare" ai muri del tracciato. Permette al robot di rimanere all'interno del percorso.
- Viene utilizzato il \textit{distance scanner} per misurare la distanza dai muri così da determinare l'intensità del campo.
- Il sensore di distanza genere 24 coppiedistanze-angolo, 12 long range e 12 short range. I valori di distanza vengono scalati in un valore tra 0 e 1 e combinati in un singolo vettore. La lunghezza del vettore viene scalata anch'essa tra 0 e 1.
+ Viene utilizzato il \textit{distance scanner} per misurare la distanza dai muri e determinare l'intensità del campo.
+ Il sensore genere 24 coppie distanza-angolo, 12 long range e 12 short range. Per ogni coppia si genera un vettore con componenti definite dalla formula sottostante.
+ I vettori vengono poi sommati per generare un singolo vettore, scalato per avere lunghezza compresa tra 0 e 1.
+
+\[V_{angle} = -\frac{\pi}{2}\]
+\[V_{length} = \left\{\begin{array}{lr}
+ \frac{D-d}{D} & d \leq D\\
+ 1 &  d > D
+ \end{array}\right\}\]
  
- $$
- V_{angle} = -\frac{\pi}{2}
- $$
- $$
- V_{length} = \left\{\begin{array}{lr}
- \frac{D-d}{D} & \text{for } d \leq D\\
- 1 & \text{for } d $>$ D
- \end{array}\right\}
- $$
+ Dove $D$ è la massima distanza percepibile dal sensore ($150cm$ per il long range, $30cm$ per il short range), mentre $d$ rappresenta la distanza misurata dal sensore.
  
- 
- \subsection{Avoid Obstacoles} 
+ \subsubsection{Avoid Obstacoles} 
  Definisce un campo "tangenziale" in presenza di ostacoli, permettendo al robot di aggirarli.
  Per misurare l'intensità e la direzione del campo viene utilizzato il \textit{proximity sensor}.
- Il sensore di distanza genere 24 coppie prossimità-angolo. Da queste viene generato un singolo vettore con lunghezza compresa tra 0 e 1.
+ Il sensore di prossimità genere 24 coppie prossimità-angolo. Per ogni lettura, si genera un vettore con componenti calcolati secondo la formula sottostante. Si sommano in un singolo vettore e lo si scala in modo da avere lunghezza compresa tra 0 e 1.
  
-  $$
- V_{angle} = \frac{\pi}{2} + \alpha
- $$
- $$
- V_{length} = p
- $$
- 
- 
- 
- 
+
+ \[V_{angle} = \frac{\pi}{2} + \alpha\]
+\[V_{length} = p\]
+
+Dove $p$ rappresenta il valore di prossimità misurato dal sensore (compreso tra 0 e 1),  mentre $\alpha$ l'angolo di misurazione.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\textwidth]{motor_schema_forces.png}
+\caption{Visualizzazione dei campi di forze agenti sul robot: "go foreward" (1), "stay on path" (2), "avoid obstacoles" (3). }
+\label{fig:motor_schema_forces}
+\end{figure}
+
+
+\subsection{Risultati}
+
+Combinando i tre comportamenti descritti: "go foreward", "stay on path" e  "avoid obstacoles", si ottengono dei buoni risultati, anche senza l'aggiunta di pesi o parametri. Nella maggior parte dei test, il robot, non solo riesce a portare a termine il percorso, ma è in grado anche di minimizzare le collisioni con ostacoli e muri.
+
+Si è notato però, che esistono  casi in cui il robot non riesce a terminare il percorso. Queste situazioni sono causate da diversi fattori, anche non evitabili se frutto di percorsi particolarmente ostici per quanto riguarda il posizionamento degli ostacoli. 
+
+Una criticità è proprio quella relativa all'aggiramento di questi ultimi. Il problema risulta particolarmente complesso, data la limitata percezione dell'ambiente del robot. E' difficile infatti, utilizzando unicamente i sensori di distanza e prossimità, trovare traiettorie ottime per superare ostacoli di varie forme e dimensioni. In questo caso si è deciso di prediligere una soluzione "semplicistica" che, seppur funzionante in alcuni casi, può generare traiettorie del tutto inefficienti, che non permettono al robot di evitare l'ostacolo e terminare il percorso.
+
+Infine, in questa implementazione, non sono stati presi particolari accorgimenti al problema dei "minimi locali", insiti nella progettazione a motor schema.  Il robot potrebbe ritrovarsi dunque "intrappolato" e non portare a termine il percorso.
+
+
 
 \section{Controller Genetico}
 \subsection{Architettura}
@@ -71,14 +156,14 @@ Gli input vengono letti da 12 sensori di distanza accoppiati ognuno con il suo a
 \begin{figure}[h]
 \centering
 \includegraphics[width=\textwidth]{genetic_network.png}
-\caption{Schema della rete neurale che controlla il robot. I 2 neuroni di ouput rappresentano la velocità delle ruote mentre gli input vengono letti da 12 sensori di distanza: ogni valore del sensore viene passato con il suo angolo. }
+\caption{Schema della rete neurale che controlla il robot. I 2 neuroni di output rappresentano la velocità delle ruote mentre gli input vengono letti da 12 sensori di distanza: ogni valore del sensore viene passato con il suo angolo. }
 \label{fig:genetic_network}
 \end{figure}
 
 \subsection{Algoritmo Genetico}
-Per l'implementazione dell'algoritmo genetico il genoma di ogni individuo viene rappresentato da un array di 50 numeri reali ((24 input + 1 bias) * 2  output = 50) nell'intervallo [-15, 15] corrispondenti ai pesi della rete. Sono stati utilizzati solo 12 dei 24 sensori presenti nel footbot per ridurre lo spazio di ricerca dell'algoritmo: utilizzarli tutti avrebbe richiesto infatti una rete composta da 98 pesi ((48+1)*2) riducendo notevolmente le performance sia in termini di tempi di esecuzione che di convergenza.
+Per l'implementazione dell'algoritmo genetico, il genoma di ogni individuo viene rappresentato da un array di 50 numeri reali ((24 input + 1 bias) * 2  output = 50) nell'intervallo [-15, 15], corrispondenti ai pesi della rete. Sono stati utilizzati solo 12 dei 24 sensori presenti nel footbot per ridurre lo spazio di ricerca dell'algoritmo: utilizzarli tutti avrebbe richiesto infatti una rete composta da 98 pesi ((48+1)*2), riducendo notevolmente le performance sia in termini di tempi di esecuzione che di convergenza.
 
-Per quanto riguarda l'evoluzione abbiamo utilizzato un approccio di tipo SteadyState in cui, ad ogni generazione, solo una certa pecentuale di individui viene sostituita dai nuovi ottenuti dalla prodecura di crossover e mutazione. Nel nostro caso in particolare la popolazione è composta da un totale di 50 individui e una percentuale di rimpiazzo pari al 50\%.  Abbiamo scelto il meccanismo di \textit{Roulette Wheel} per la selezione e di \textit{Gaussian Mutation} per la mutazione.
+Per quanto riguarda l'evoluzione, abbiamo utilizzato un approccio di tipo SteadyState in cui, ad ogni generazione, solo una certa percentuale di individui viene sostituita dai nuovi ottenuti dalla procedura di crossover e mutazione. Nel nostro caso la popolazione è composta da un totale di 50 individui e una percentuale di rimpiazzo pari al 50\%.  Abbiamo scelto il meccanismo di \textit{Roulette Wheel} per la selezione e di \textit{Gaussian Mutation} per la mutazione.
 Per quanto riguarda il crossover abbiamo invece sperimentato e confrontato 3 diverse modalità: 
 \begin{itemize}
 \item{OnePointCrossover}: Si sceglie a caso un punto sui cromosomi di entrambi i genitori detto "punto di crossover"; i valori a destra di quel punto vengono scambiati tra i due genitori generando 2 nuovi cromosomi figli.
@@ -86,31 +171,118 @@ Per quanto riguarda il crossover abbiamo invece sperimentato e confrontato 3 div
 \item{UniformCrossover}: Ognuno dei 2 figli ha una uguale probabilità di ereditare un certo gene da uno dei suoi genitori.
  \end{itemize}
 
-La funzione di fitness di ogni individuo è la seguente
+La funzione di fitness implementata è la seguente
 
-\[avgPerformance * \dfrac{1}{1+distance}\]
+\[\bar{p} \cdot \frac{1}{1+d}\]
 
-E composta dal prodotto di due termini: il primo che misura la performance media del robot in termini di velocità mantenuta durante il percorso e ostacoli evitati; la seconda che misura la distanza dall'arrivo. In particolare la performance media è calcolata suddividendo l'esperimento in slot temporali di lubghezza M per ognuno dei quali si calcola la seguente grandezza
+dove $d$ è la distanza dall'arrivo: assume valori in [0, $+\infty$[ quindi $\frac{1}{1+d}$ è un valore compreso tra 0 e 1; $\bar{p}$ misura invece la performance media del robot in termini di velocità mantenuta durante il percorso e ostacoli evitati: dette $V_L$ e $V_R$ la velocità delle ruote mappate in valori tra -1 e 1 e $i$ il massimo valore di prossimità, la performance del robot in un certo istante $k$ è un valore compreso tra 0 e 1 calcolato nel seguente modo
 
-\[(1-i)^2 * |\dfrac{(V_L+V_R)}{2}| * \dfrac{1}{1+|V_R-V_L|}\]
+\[p_k = (1-i)^2 \cdot \frac{|V_L+V_R|}{2} \cdot (1-\frac{|V_L-V_R|}{2})\]
+
+\begin{itemize}
+    \item $1-i \in [0,1]$ ha il suo valore massimo quando il robot evita gli ostacoli. \'E elevato al quadrato in quanto abbiamo notato che altrimenti l'algoritmo genetico tendeva a convergere verso un massimo locale in cui gli individui massimizzavano il secondo termine della fitness ($\frac{1}{1+d}$) senza tenere conto degli ostacoli.
+    \item $\dfrac{|V_L+V_R|}{2} \in [0,1]$ è il termine utilizzato per massimizzare la velocità del robot
+    \item $1-\dfrac{|V_L-V_R|}{2}  \in [0,1]$ server a far si che il robot tenda ad andare dritto; il termine è massimo se le due ruote hanno la stessa velocità.
+\end{itemize}
+
+Se $L$ è il numero totale di step della simulazione allora
+
+\[\bar{p} = \frac{1}{L} \sum_{k=1}^{L}p_k\]
+
+La performance di ogni individuo viene infine calcolata utilizzando un approccio di \textit{Minimal guaranteed quality}: vengono lanciate 5 simulazioni e si considera come valore finale il peggior risultato ottenuto.
+
 
 \subsection{Test e Risultati}
+Per l'implementazione in C++ dei vari algoritmi  è stata utilizzata la libreria GAlib\footnote{http://lancet.mit.edu/galib-2.4/}.
+I parametri utilizzati nei test sono:
+\begin{verbatim}
+    Numero di generazioni: 500
+    Dimensione della popolazione: 50
+    Probabilità di mutazione: 0.05
+    Probabilità di crossover: 0.8
+    Percentuale di rimpiazzo: 0.5
+\end{verbatim}
 
-Per ogni individuo nella popolazione sono stati eseguite 5 simulazioni
+I grafici in figura \ref{fig:fitness_evolution} mostrano, per le diverse modalità di crossover, l'andamento della fitness massima e media all'avanzare delle generazioni. 
+\begin{figure}[h]
+\centering
+\begin{subfigure}[b]{0.5\columnwidth}
+   \includegraphics[width=1\linewidth]{one_point_cross_evolution.png}
+\end{subfigure}%
+\begin{subfigure}[b]{0.5\columnwidth}
+   \includegraphics[width=1\linewidth]{two_point_cross_evolution.png}
+\end{subfigure}
+\begin{subfigure}[b]{0.5\columnwidth}
+   \includegraphics[width=1\linewidth]{uniform_cross_evolution.png}
+\end{subfigure}
+\caption{Grafici relativi a fitness massima e media all'aumentare delle generazioni per i diversi meccanismi di crossover.}
+\label{fig:fitness_evolution}
+\end{figure}
+Si nota come One-Point Crossover è quello che raggiunge le perfromance migliori mentre utilizzando Two-point o Uniorm Crossover la popolazione non riesce a raggiungere gli stessi risultati. 
 
-I parametri utilizzati nei vari test sono:
-Number of generations 500
-Population size 50
-Mutation probability 0.05
-Crossover probability 0.8
-Replacement percentage 0.5
+I 3 migliori controller ottenuti dopo 500 generazioni sono stati testati su 200 percorsi; i risultati delle performance sono mostrati in figura \ref{fig:crossover_box_plot} tramite boxplot. Il controller allenato con OnePointCrossover risulta essere effettivamente il migliore, seppur con alcuni dati molto bassi probabilmente dovuti a configurazioni del percorso particolarmente "insidiose". 
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5\textwidth]{res/crossover_box_plot.png}
+\caption{Box plot relativi ai 3 metodi di crossover ottenuti su 200 test. }
+\label{fig:crossover_box_plot}
+\end{figure}
+Una volta appurato che One-Point Crossover forniva i migliori risultati, abbiamo provato a fare tuning di altri parametri, nello specifico probabilità di mutazione e crossover. In figura \ref{fig:one_point_box_plot} sono riportati i valori ottenuti su 200 test.
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.5\textwidth]{res/one_point_box_plot.png}
+\caption{Box plot ottenuti con One-Point Crossover variando diversi parametri dell'algoritmo}
+\label{fig:one_point_box_plot}
+\end{figure}
+In questo caso il migliore risulta essere il controller di mezzo con una probabilità di crossover di 0.9 e mutazione 0.05.
 
-Per l'implementazione del codice in C++ è stata utilizzata la libreria GAlib\footnote{http://lancet.mit.edu/galib-2.4/} che mette a disposizione diverse funzionalità relative ai principali meccanismi degli algoritmi genetici.
+\section{Confronto tra controller}
+Per prima cosa abbiamo misurato le performance del controller basato su motor schema utilizzando la funzione di fitness dell'algoritmo genetico. I risultati su 200 test sono riportati nel box plot in figura \ref{fig:ms_vs_cross}, accanto a quelli del contoller genetico (i due robot in questo caso percorrono il tracciato singolarmente, senza alcun tipo di competizione).
+
+Per valutare se le differenze emerse siano statisticamente rilevanti, è stato effettuato un test statistico di Wilcoxon sui valori di performance nelle 200 gare.
+Utilizzando la funzione R \texttt{wilcox.test} si ha un \textit{p-value} di \textit{0.6969}. 
+Non possiamo quindi rigettare l'ipotesi nulla secondo cui i controller restituiscono lo stesso comportamento.
+
+Terminata l'analisi singola, abbiamo fatto gareggiare i 2 robot contemporaneamente su 200 istanze diverse del percorso. I risultati del numero di vittorie per i 2 controller sono visibili in figura \ref{fig:winners}. Nel grafico sono riportati anche i pareggi, intesi come situazioni in cui nessuno dei robot è stato in grado di terminare il percorso.
+
+Si può notare come l'algoritmo genetico vinca sul motor schema.
+Questo può essere dovuto al fatto che, mentre il controller a motor schema presenta una struttura particolarmente generica ed indipendente dal percorso di test, l'algoritmo genetico è stato addestrato proprio su quel tracciato.
+Anche se questo "svantaggio" è mitigato dalla presenza di ostacoli posti casualmente, lo scarto tra i due si potrebbe colmare, probabilmente, andando ad aggiungere pesi e parametri al motor schema ed effettuando un fine tuning per adattarli alla struttura base del percorso.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.55\textwidth]{res/ms_vs_gen_box_plot.png}
+\caption{Box plot di motor schema e controller genetico ottenuti eseguendo 200 test.}
+\label{fig:ms_vs_cross}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.55\textwidth]{res/race_results.png}
+\caption{Numero di vittorie per controller ottenute su 200 gare. I pareggi indicano situazioni in cui nessuno dei due robot è stato in grado di terminare il percorso}
+\label{fig:winners}
+\end{figure}
+
+\newpage
+
+\section{Conclusioni}
+Abbiamo sviluppato due controller per una competizione tra robot in un percorso ad ostacoli. Il primo basato su un'implementazione manuale attraverso motor schema; il secondo ottenuto utilizzando un approccio evolutivo. 
+
+Abbiamo analizzato le prestazioni, prima singolarmente, poi in una situazione competitiva;
+mostrando come "in gara" l'algoritmo genetico risulti migliore rispetto al motor schema, mentre per quanto riguarda le performance singole non ci siano differenze statisticamente rilevanti.
+
+Per meglio valutare la "bontà" di un controller rispetto all'altro, si potrebbero calare i robot in percorsi diversi da quello di test, e analizzarne il comportamento, così da poter garantire la generalità e la robustezza rispetto alla varietà dei tracciati.
+
+In questo contesto i due robot sono stati progettati senza considerare l'aspetto competitivo della gara.
+Un ulteriore sviluppo potrebbe essere quello di progettare i controller prestando particolare attenzione alla competizione, considerano anche più di due robot all'interno del percorso.
+Pensiamo che in questo caso l'approccio manuale risulterebbe alquanto complesso, mentre un algoritmo evolutivo potrebbe adattarsi più facilmente alla presenza di "avversari", imparando ad esempio tecniche ed abilità per il sorpasso.
 
 
+
+
+\clearpage
 
 
 \bibliographystyle{unsrt}
 \bibliography{bibliografia}
-
 \end{document}          
