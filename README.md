@@ -3,5 +3,5 @@ In this project we implemented two robot controllers that compete in an obstacle
 
 The first controller was designed manually using Motor Schemas; the other one was designed using a genetic algorithm applied to a neural network;
 
-Vist: https://stefanosalvatori.github.io/RobotRace-Examples/ to see the results.
+Vist: https://stefano-salvatori.github.io/RobotRace-Examples/ to see the results.
 
